@@ -1,0 +1,53 @@
+/* Meldingenpaneel onder de adminbalk (module Opruimen). */
+.hm-toolkit-notices-panel {
+	position: fixed;
+	top: 42px;
+	right: 20px;
+	z-index: 99999;
+	box-sizing: border-box;
+	width: min(720px, calc(100vw - 40px));
+	max-height: 70vh;
+	overflow: auto;
+	padding: 0 16px 8px;
+	background: #f0f0f1;
+	border: 1px solid #c3c4c7;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.hm-toolkit-notices-panel[hidden] {
+	display: none;
+}
+
+.hm-toolkit-notices-panel__head {
+	position: sticky;
+	top: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 0 8px;
+	background: #f0f0f1;
+}
+
+.hm-toolkit-notices-panel .notice,
+.hm-toolkit-notices-panel .error,
+.hm-toolkit-notices-panel .updated,
+.hm-toolkit-notices-panel .update-nag {
+	display: block;
+	margin: 0 0 10px;
+}
+
+#wpadminbar #wp-admin-bar-hm-toolkit-notices .ab-icon::before {
+	top: 2px;
+}
+
+@media screen and (max-width: 782px) {
+	.hm-toolkit-notices-panel {
+		top: 56px;
+		right: 10px;
+		width: calc(100vw - 20px);
+	}
+
+	#wpadminbar #wp-admin-bar-hm-toolkit-notices {
+		display: block;
+	}
+}
