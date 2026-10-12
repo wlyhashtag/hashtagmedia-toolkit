@@ -94,6 +94,13 @@ define( 'WP_ENVIRONMENT_TYPE', 'production' );
 
 Het label wordt bij elk verzoek opnieuw bepaald en staat niet in de database, dus na verhuizen met Duplicator klopt het meteen. Filter: `hm_toolkit_environment_type`.
 
+## Versies en releases
+
+- Elke versie krijgt een tag `vX.Y.Z` op de commit waarin het versienummer in `hashtagmedia-toolkit.php` is verhoogd.
+- `./bin/build-zip.sh` maakt `dist/hashtagmedia-toolkit-X.Y.Z.zip` om te uploaden; oude zips worden daarbij opgeruimd. `dist/` staat niet in git.
+- Een oude versie nodig? Check de tag uit en draai het bouwscript opnieuw.
+- Later (GitHub-updater): bij een nieuwe tag maakt GitHub automatisch een release met de zip.
+
 ## Kwaliteit
 
 ```
