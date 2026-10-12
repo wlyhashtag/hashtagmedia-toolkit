@@ -1,0 +1,68 @@
+# Bij elke push naar main:
+# 1. PHPCS (WordPress Coding Standards) controleert de code.
+# 2. Is het versienummer in hashtagmedia-toolkit.php nieuw, dan maakt GitHub
+#    zelf de tag vX.Y.Z en een release met de zip om te uploaden.
+# Niets handmatig taggen: alleen het versienummer verhogen en pushen.
+name: Controle en release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  phpcs:
+    name: PHPCS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+          coverage: none
+      - name: Afhankelijkheden installeren
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: PHPCS draaien
+        run: vendor/bin/phpcs --report-full --report-summary
+
+  release:
+    name: Tag en release
+    needs: phpcs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Versie lezen
+        id: versie
+        run: |
+          VERSION=$(sed -n 's/^ \* Version: *//p' hashtagmedia-toolkit.php | tr -d '[:space:]')
+          if [ -z "$VERSION" ]; then echo "Geen versienummer gevonden"; exit 1; fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            echo "bestaat=ja" >> "$GITHUB_OUTPUT"
+            echo "Versie $VERSION heeft al een release; niets te doen."
+          else
+            echo "bestaat=nee" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Zip bouwen
+        if: steps.versie.outputs.bestaat == 'nee'
+        run: bash ./bin/build-zip.sh
+      - name: Tag en release maken
+        if: steps.versie.outputs.bestaat == 'nee'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.versie.outputs.version }}
+        run: |
+          gh release create "v$VERSION" "dist/hashtagmedia-toolkit-$VERSION.zip" \
+            --target "$GITHUB_SHA" \
+            --title "HashtagMedia Toolkit $VERSION" \
+            --generate-notes
