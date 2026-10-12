@@ -1,5 +1,6 @@
 /**
- * Beheermenu: slepen, pijltjes en submenu's op het instellingentabblad.
+ * Beheermenu: slepen (ook met de pijltjestoetsen op de greep) en submenu's
+ * op het instellingentabblad.
  */
 ( function ( $ ) {
 	'use strict';
@@ -21,6 +22,8 @@
 	$list.sortable( {
 		items: '> .hm-menu-item',
 		handle: '.hm-menu-item__handle, .hm-menu-item__title',
+		// De greep is een knop; standaard slaat sortable knoppen over.
+		cancel: 'input, textarea, select, option, .hm-menu-expand, .hm-toggle',
 		placeholder: 'hm-menu-placeholder',
 		axis: 'y',
 		tolerance: 'pointer',
@@ -29,15 +32,26 @@
 		}
 	} );
 
-	$list.on( 'click', '.hm-menu-move', function () {
-		var $button = $( this );
-		var $item = $button.closest( '.hm-menu-item' );
-		if ( 'up' === $button.data( 'direction' ) ) {
-			$item.prev( '.hm-menu-item' ).before( $item );
+	// Toetsenbord: pijltje omhoog/omlaag op de greep verplaatst het item.
+	$list.on( 'keydown', '.hm-menu-item__handle', function ( event ) {
+		var $handle = $( this );
+		var $item = $handle.closest( '.hm-menu-item' );
+		var $target;
+		if ( 'ArrowUp' === event.key ) {
+			$target = $item.prev( '.hm-menu-item' );
+			if ( $target.length ) {
+				$target.before( $item );
+			}
+		} else if ( 'ArrowDown' === event.key ) {
+			$target = $item.next( '.hm-menu-item' );
+			if ( $target.length ) {
+				$target.after( $item );
+			}
 		} else {
-			$item.next( '.hm-menu-item' ).after( $item );
+			return;
 		}
-		$button.trigger( 'focus' );
+		event.preventDefault();
+		$handle.trigger( 'focus' );
 		announce( $item );
 	} );
 

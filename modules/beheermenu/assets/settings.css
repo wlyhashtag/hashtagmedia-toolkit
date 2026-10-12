@@ -39,8 +39,23 @@
 }
 
 .hm-menu-item__handle {
+	display: inline-flex;
+	padding: 2px;
+	border: 0;
+	border-radius: 2px;
+	background: none;
 	color: #8c8f94;
 	cursor: grab;
+}
+
+.hm-menu-item__handle:hover {
+	color: var(--wp-admin-theme-color, #3858e9);
+}
+
+.hm-menu-item__handle:focus-visible {
+	outline: 2px solid var(--wp-admin-theme-color, #3858e9);
+	outline-offset: 1px;
+	color: var(--wp-admin-theme-color, #3858e9);
 }
 
 .hm-menu-item__title {
@@ -53,15 +68,6 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-}
-
-.hm-menu-move {
-	color: #50575e;
-}
-
-.hm-menu-move:hover,
-.hm-menu-move:focus {
-	color: var(--wp-admin-theme-color, #3858e9);
 }
 
 .hm-menu-expand {

@@ -114,7 +114,7 @@ composer fix      # Automatisch herstelbare fouten oplossen
 
 ## Module Beheermenu
 
-Hoofdmenu-items slepen (of met de pijltjes verplaatsen) en hoofd- of submenu-items verbergen.
+Hoofdmenu-items slepen (met het toetsenbord: greep focussen en pijltje omhoog/omlaag) en hoofd- of submenu-items verbergen.
 
 - Klanten zien verborgen items helemaal niet.
 - HashtagMedia-beheerders vinden ze onder "Alles tonen" onderaan het menu. De keuze wordt per browser onthouden.

@@ -8,7 +8,36 @@
 	--hm-accent: var(--wp-admin-theme-color, #3858e9);
 	--hm-border: #dcdcde;
 	--hm-muted: #50575e;
+}
+
+/* Inhoud niet te breed; de tabbalk wel over de volle breedte. */
+.hm-toolkit-page > form,
+.hm-toolkit-page > .notice {
 	max-width: 960px;
+}
+
+/* Alle tabbladen op één regel; past het niet, dan horizontaal scrollen. */
+.hm-toolkit-page .nav-tab-wrapper {
+	display: flex;
+	flex-wrap: nowrap;
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+
+.hm-toolkit-page .nav-tab {
+	flex: none;
+	white-space: nowrap;
+}
+
+@media screen and (max-width: 782px) {
+	.hm-toolkit-page .nav-tab-wrapper {
+		margin-right: -10px;
+		padding-right: 10px;
+	}
+
+	.hm-toolkit-page .nav-tab {
+		margin-bottom: 0;
+	}
 }
 
 /* Schakelaar, gelijk aan de ToggleControl van de blokeditor. */

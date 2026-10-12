@@ -257,7 +257,8 @@ final class Module extends Base {
 			$this->hidden_sub()
 		);
 		?>
-		<p><?php esc_html_e( 'Sleep items naar de gewenste plek of gebruik de pijltjes. Zet een schakelaar uit om een item te verbergen.', 'hashtagmedia-toolkit' ); ?></p>
+		<p><?php esc_html_e( 'Sleep items naar de gewenste plek. Zet een schakelaar uit om een item te verbergen.', 'hashtagmedia-toolkit' ); ?></p>
+		<p class="screen-reader-text" id="hm-menu-keys"><?php esc_html_e( 'Gebruik de pijltjestoetsen omhoog en omlaag om het item te verplaatsen.', 'hashtagmedia-toolkit' ); ?></p>
 		<ul class="description hm-menu-help">
 			<li><?php esc_html_e( 'Klanten zien verborgen items helemaal niet.', 'hashtagmedia-toolkit' ); ?></li>
 			<li><?php esc_html_e( 'Beheerders vinden ze onder "Alles tonen" onderaan het menu.', 'hashtagmedia-toolkit' ); ?></li>
@@ -280,27 +281,17 @@ final class Module extends Base {
 					<input type="hidden" name="hm_toolkit[order][]" value="<?php echo esc_attr( $slug ); ?>">
 					<input type="hidden" name="hm_toolkit[known][]" value="<?php echo esc_attr( $slug ); ?>">
 					<div class="hm-menu-item__row">
-						<span class="hm-menu-item__handle dashicons dashicons-move" aria-hidden="true"></span>
+						<button type="button" class="hm-menu-item__handle" aria-describedby="hm-menu-keys">
+							<span class="dashicons dashicons-move" aria-hidden="true"></span>
+							<span class="screen-reader-text">
+								<?php
+								/* translators: %s: naam van het menu-item */
+								printf( esc_html__( '%s verplaatsen', 'hashtagmedia-toolkit' ), esc_html( $title ) );
+								?>
+							</span>
+						</button>
 						<span class="hm-menu-item__title"><?php echo esc_html( $title ); ?></span>
 						<span class="hm-menu-item__actions">
-							<button type="button" class="button-link hm-menu-move" data-direction="up">
-								<span class="dashicons dashicons-arrow-up-alt2" aria-hidden="true"></span>
-								<span class="screen-reader-text">
-									<?php
-									/* translators: %s: naam van het menu-item */
-									printf( esc_html__( '%s omhoog', 'hashtagmedia-toolkit' ), esc_html( $title ) );
-									?>
-								</span>
-							</button>
-							<button type="button" class="button-link hm-menu-move" data-direction="down">
-								<span class="dashicons dashicons-arrow-down-alt2" aria-hidden="true"></span>
-								<span class="screen-reader-text">
-									<?php
-									/* translators: %s: naam van het menu-item */
-									printf( esc_html__( '%s omlaag', 'hashtagmedia-toolkit' ), esc_html( $title ) );
-									?>
-								</span>
-							</button>
 							<?php if ( count( $children ) > 1 ) : ?>
 								<button type="button" class="button-link hm-menu-expand" aria-expanded="false" aria-controls="<?php echo esc_attr( $id . '-sub' ); ?>">
 									<?php esc_html_e( 'Submenu', 'hashtagmedia-toolkit' ); ?>

@@ -59,13 +59,20 @@ final class Admin_Page {
 	}
 
 	/**
-	 * Stylesheet van de instellingenpagina, alleen op deze pagina.
+	 * Stylesheet van de instellingenpagina, alleen op deze pagina. Plus een
+	 * regel script: op smalle schermen het actieve tabblad in beeld scrollen.
 	 */
 	public static function enqueue_on_load(): void {
 		add_action(
 			'admin_enqueue_scripts',
 			static function () {
 				wp_enqueue_style( 'hm-toolkit-admin', plugins_url( 'assets/admin.css', HM_TOOLKIT_FILE ), array(), HM_TOOLKIT_VERSION );
+				wp_register_script( 'hm-toolkit-admin', false, array(), HM_TOOLKIT_VERSION, true );
+				wp_enqueue_script( 'hm-toolkit-admin' );
+				wp_add_inline_script(
+					'hm-toolkit-admin',
+					"(function(){var n=document.querySelector('.hm-toolkit-page .nav-tab-wrapper'),a=n&&n.querySelector('.nav-tab-active');if(a&&n.scrollWidth>n.clientWidth){n.scrollLeft=a.offsetLeft-n.offsetLeft-(n.clientWidth-a.offsetWidth)/2;}}());"
+				);
 			}
 		);
 	}
