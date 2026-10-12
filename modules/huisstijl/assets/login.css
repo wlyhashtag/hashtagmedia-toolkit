@@ -1,0 +1,102 @@
+/**
+ * Loginpagina in HashtagMedia-huisstijl.
+ * Donkerblauw #00151F, diep accent #0077A3, lichtvlak #E7F1F6.
+ */
+
+body.login {
+	background: #e7f1f6;
+	color: #00151f;
+}
+
+.login h1 a {
+	width: 240px;
+	height: 68px;
+	margin-bottom: 28px;
+	background-size: contain;
+	background-position: center;
+}
+
+.login form {
+	padding: 28px 24px;
+	border: 0;
+	border-radius: 12px;
+	box-shadow: 0 8px 30px rgba(0, 21, 31, 0.08);
+}
+
+.login label {
+	color: #00151f;
+}
+
+.login form .input,
+.login input[type="text"],
+.login input[type="password"],
+.login input[type="email"] {
+	border-color: #8ea6b2;
+	border-radius: 6px;
+}
+
+.login form .input:focus,
+.login input[type="text"]:focus,
+.login input[type="password"]:focus,
+.login input[type="email"]:focus,
+.login input[type="checkbox"]:focus {
+	border-color: #0077a3;
+	box-shadow: 0 0 0 1px #0077a3;
+}
+
+.login .button.wp-hide-pw {
+	color: #0077a3;
+}
+
+.login .button.wp-hide-pw:focus {
+	border-color: #0077a3;
+	box-shadow: 0 0 0 1px #0077a3;
+}
+
+.login input[type="checkbox"]:checked::before {
+	filter: none;
+}
+
+.login input[type="checkbox"]:checked {
+	border-color: #0077a3;
+	background: #0077a3;
+}
+
+.wp-core-ui.login .button-primary {
+	border-color: #0077a3;
+	border-radius: 6px;
+	background: #0077a3;
+	color: #fff;
+	text-shadow: none;
+	box-shadow: none;
+}
+
+.wp-core-ui.login .button-primary:hover,
+.wp-core-ui.login .button-primary:focus {
+	border-color: #00151f;
+	background: #00151f;
+	color: #fff;
+}
+
+.wp-core-ui.login .button-primary:focus {
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0077a3;
+}
+
+.login #nav a,
+.login #backtoblog a,
+.login .privacy-policy-page-link a {
+	color: #00151f;
+}
+
+.login #nav a:hover,
+.login #backtoblog a:hover,
+.login .privacy-policy-page-link a:hover {
+	color: #0077a3;
+}
+
+.login .message,
+.login .notice,
+.login .success {
+	border-left-color: #0077a3;
+	border-radius: 6px;
+}

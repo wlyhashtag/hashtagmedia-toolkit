@@ -1,0 +1,192 @@
+/**
+ * Klantdashboard (module Huisstijl en dashboard). Alleen op het dashboard.
+ */
+
+/* Blokken staan vast: geen sleepgrepen of inklapknoppen. */
+#dashboard-widgets .postbox .handle-actions {
+	display: none;
+}
+
+#dashboard-widgets .postbox .hndle {
+	cursor: default;
+}
+
+#dashboard-widgets .meta-box-sortables.empty-container {
+	min-height: 0;
+	border: 0;
+	outline: 0;
+}
+
+#dashboard-widgets .meta-box-sortables.empty-container::after {
+	content: none;
+	display: none;
+}
+
+/* Welkom. */
+.hm-dash-welcome__title {
+	margin-top: 0;
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.hm-dash-contact,
+.hm-dash-support {
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.hm-dash-contact__title {
+	margin: 0 0 8px;
+	font-weight: 600;
+}
+
+.hm-dash-contact p {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin: 6px 0;
+}
+
+.hm-dash-contact .dashicons {
+	color: var(--wp-admin-theme-color, #3858e9);
+}
+
+.hm-dash-support label {
+	display: block;
+	margin-bottom: 4px;
+	font-weight: 500;
+}
+
+.hm-dash-support .notice {
+	margin: 8px 0 12px;
+}
+
+.hm-dash-support__submit {
+	margin-bottom: 0;
+}
+
+/* Snelle acties. */
+.hm-dash-actions {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: 10px;
+	margin: 0;
+}
+
+.hm-dash-actions li {
+	margin: 0;
+}
+
+.hm-dash-actions__button {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 88px;
+	padding: 14px 10px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #fff;
+	color: #1e1e1e;
+	font-weight: 500;
+	text-align: center;
+	text-decoration: none;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hm-dash-actions__button .dashicons {
+	width: 28px;
+	height: 28px;
+	font-size: 28px;
+	color: var(--wp-admin-theme-color, #3858e9);
+}
+
+.hm-dash-actions__button:hover,
+.hm-dash-actions__button:focus {
+	border-color: var(--wp-admin-theme-color, #3858e9);
+	color: #1e1e1e;
+	box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #3858e9);
+	outline: none;
+}
+
+/* Lijsten: inzendingen en recent bewerkt. */
+.hm-dash-list {
+	margin: 0;
+}
+
+.hm-dash-list li {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 8px;
+	margin: 0;
+	padding: 10px 0;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.hm-dash-list li:last-child {
+	border-bottom: 0;
+}
+
+.hm-dash-list li.is-unread > a {
+	font-weight: 600;
+}
+
+.hm-dash-list__type {
+	padding: 1px 6px;
+	border-radius: 4px;
+	background: #f0f0f1;
+	color: #50575e;
+	font-size: 12px;
+}
+
+.hm-dash-list__meta {
+	flex-basis: 100%;
+	color: #646970;
+	font-size: 12px;
+}
+
+.hm-dash-badge {
+	padding: 1px 6px;
+	border-radius: 4px;
+	background: var(--wp-admin-theme-color, #3858e9);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.hm-dash-entries__unread {
+	margin-top: 0;
+	font-weight: 600;
+}
+
+.hm-dash-more {
+	margin-bottom: 0;
+}
+
+/* Technische info. */
+.hm-dash-tech {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.hm-dash-tech th,
+.hm-dash-tech td {
+	padding: 6px 0;
+	border-bottom: 1px solid #f0f0f1;
+	text-align: left;
+	vertical-align: top;
+}
+
+.hm-dash-tech th {
+	width: 45%;
+	font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hm-dash-actions__button {
+		transition: none;
+	}
+}

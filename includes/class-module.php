@@ -206,25 +206,82 @@ abstract class Module {
 	}
 
 	/**
-	 * Een tabelrij met een schakelaar (checkbox), in de stijl van WordPress.
+	 * ID van een formulierveld.
+	 *
+	 * @param string $key Sleutel.
+	 * @return string
+	 */
+	final protected function field_id( string $key ): string {
+		return 'hm-' . $this->slug . '-' . str_replace( '_', '-', $key );
+	}
+
+	/**
+	 * Een tabelrij met een schakelaar, in de stijl van WordPress.
 	 *
 	 * @param string $key         Sleutel van de instelling.
 	 * @param string $label       Label links.
-	 * @param string $text        Tekst naast het vinkje.
+	 * @param string $text        Tekst naast de schakelaar.
 	 * @param string $description Optionele uitleg eronder.
 	 */
 	final protected function checkbox_row( string $key, string $label, string $text, string $description = '' ): void {
-		$id = 'hm-' . $this->slug . '-' . $key;
+		$id = $this->field_id( $key );
 		?>
 		<tr>
 			<th scope="row"><?php echo esc_html( $label ); ?></th>
 			<td>
-				<label for="<?php echo esc_attr( $id ); ?>">
-					<input type="checkbox" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $this->field_name( $key ) ); ?>" value="1" <?php checked( (bool) $this->get( $key ) ); ?>>
-					<?php echo esc_html( $text ); ?>
+				<label class="hm-toggle" for="<?php echo esc_attr( $id ); ?>">
+					<input type="checkbox" role="switch" class="hm-toggle__input" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $this->field_name( $key ) ); ?>" value="1" <?php checked( (bool) $this->get( $key ) ); ?>>
+					<span class="hm-toggle__text"><?php echo esc_html( $text ); ?></span>
 				</label>
 				<?php if ( '' !== $description ) : ?>
 					<p class="description"><?php echo esc_html( $description ); ?></p>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * Een tabelrij met een tekstveld (text, email of url).
+	 *
+	 * @param string $key         Sleutel van de instelling.
+	 * @param string $label       Label links.
+	 * @param string $type        text, email of url.
+	 * @param string $description Optionele uitleg eronder.
+	 * @param string $placeholder Optionele placeholder.
+	 */
+	final protected function input_row( string $key, string $label, string $type = 'text', string $description = '', string $placeholder = '' ): void {
+		$id   = $this->field_id( $key );
+		$type = in_array( $type, array( 'text', 'email', 'url' ), true ) ? $type : 'text';
+		?>
+		<tr>
+			<th scope="row"><label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $label ); ?></label></th>
+			<td>
+				<input type="<?php echo esc_attr( $type ); ?>" class="regular-text" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $this->field_name( $key ) ); ?>" value="<?php echo esc_attr( (string) $this->get( $key, '' ) ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>"<?php echo $description ? ' aria-describedby="' . esc_attr( $id . '-description' ) . '"' : ''; ?>>
+				<?php if ( '' !== $description ) : ?>
+					<p class="description" id="<?php echo esc_attr( $id . '-description' ); ?>"><?php echo esc_html( $description ); ?></p>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * Een tabelrij met een tekstvak.
+	 *
+	 * @param string $key         Sleutel van de instelling.
+	 * @param string $label       Label links.
+	 * @param string $description Optionele uitleg eronder.
+	 */
+	final protected function textarea_row( string $key, string $label, string $description = '' ): void {
+		$id = $this->field_id( $key );
+		?>
+		<tr>
+			<th scope="row"><label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $label ); ?></label></th>
+			<td>
+				<textarea class="large-text" rows="3" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $this->field_name( $key ) ); ?>"<?php echo $description ? ' aria-describedby="' . esc_attr( $id . '-description' ) . '"' : ''; ?>><?php echo esc_textarea( (string) $this->get( $key, '' ) ); ?></textarea>
+				<?php if ( '' !== $description ) : ?>
+					<p class="description" id="<?php echo esc_attr( $id . '-description' ); ?>"><?php echo esc_html( $description ); ?></p>
 				<?php endif; ?>
 			</td>
 		</tr>

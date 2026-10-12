@@ -24,6 +24,16 @@
 		</properties>
 	</rule>
 
+	<!-- Rechten van plugins uit de vaste stack. -->
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<element value="gravityforms_view_entries"/>
+				<element value="gform_full_access"/>
+			</property>
+		</properties>
+	</rule>
+
 	<!-- Alles in de namespace HashtagMedia\Toolkit; globale namen met hm_toolkit_.
 	     Alleen de thema-helpers (hm_image() e.d.) gebruiken het korte hm_, in
 	     één bestand met een gedocumenteerde uitzondering. -->

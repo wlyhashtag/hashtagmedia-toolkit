@@ -7,7 +7,7 @@
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
-define( 'HM_TOOLKIT_DIR', plugin_dir_path( __FILE__ ) );
+defined( 'HM_TOOLKIT_DIR' ) || define( 'HM_TOOLKIT_DIR', plugin_dir_path( __FILE__ ) );
 
 require_once HM_TOOLKIT_DIR . 'includes/class-settings.php';
 require_once HM_TOOLKIT_DIR . 'includes/class-module.php';

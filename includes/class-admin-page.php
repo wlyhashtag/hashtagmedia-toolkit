@@ -53,8 +53,21 @@ final class Admin_Page {
 			81
 		);
 
-		// Alleen op deze pagina de map doorzoeken, zodat nieuwe modules verschijnen.
+		// Alleen op deze pagina: de map doorzoeken (nieuwe modules) en de eigen stijl laden.
 		add_action( 'load-' . $hook, array( Registry::class, 'sync' ) );
+		add_action( 'load-' . $hook, array( self::class, 'enqueue_on_load' ) );
+	}
+
+	/**
+	 * Stylesheet van de instellingenpagina, alleen op deze pagina.
+	 */
+	public static function enqueue_on_load(): void {
+		add_action(
+			'admin_enqueue_scripts',
+			static function () {
+				wp_enqueue_style( 'hm-toolkit-admin', plugins_url( 'assets/admin.css', HM_TOOLKIT_FILE ), array(), HM_TOOLKIT_VERSION );
+			}
+		);
 	}
 
 	/**
@@ -118,7 +131,7 @@ final class Admin_Page {
 		$tabs    = self::tabs();
 		$current = self::current_tab( $tabs );
 		?>
-		<div class="wrap">
+		<div class="wrap hm-toolkit-page">
 			<h1><?php esc_html_e( 'HashtagMedia', 'hashtagmedia-toolkit' ); ?></h1>
 			<hr class="wp-header-end">
 			<?php self::render_notice(); ?>
@@ -179,38 +192,29 @@ final class Admin_Page {
 			<input type="hidden" name="action" value="hm_toolkit_save_modules">
 			<?php wp_nonce_field( 'hm_toolkit_save_modules' ); ?>
 
-			<table class="widefat striped">
-				<thead>
-					<tr>
-						<td class="check-column"><span class="screen-reader-text"><?php esc_html_e( 'Aan', 'hashtagmedia-toolkit' ); ?></span></td>
-						<th scope="col"><?php esc_html_e( 'Module', 'hashtagmedia-toolkit' ); ?></th>
-						<th scope="col"><?php esc_html_e( 'Uitleg', 'hashtagmedia-toolkit' ); ?></th>
-						<th scope="col"><?php esc_html_e( 'Beheer', 'hashtagmedia-toolkit' ); ?></th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php foreach ( $found as $slug => $meta ) : ?>
-						<?php
-						$enabled = Settings::is_enabled( $slug );
-						$id      = 'hm-module-' . $slug;
-						?>
-						<tr>
-							<th scope="row" class="check-column">
-								<input type="checkbox" id="<?php echo esc_attr( $id ); ?>" name="modules[]" value="<?php echo esc_attr( $slug ); ?>" <?php checked( $enabled ); ?>>
-							</th>
-							<td><label for="<?php echo esc_attr( $id ); ?>"><strong><?php echo esc_html( $meta['name'] ); ?></strong></label></td>
-							<td><?php echo esc_html( $meta['description'] ); ?></td>
-							<td>
-								<?php if ( $enabled && Registry::get( $slug ) && Registry::get( $slug )->has_tab() ) : ?>
-									<a href="<?php echo esc_url( self::url( $slug ) ); ?>"><?php esc_html_e( 'Instellingen', 'hashtagmedia-toolkit' ); ?></a>
-								<?php elseif ( ! $enabled && Settings::has_module_settings( $slug ) ) : ?>
-									<a href="<?php echo esc_url( self::cleanup_url( $slug ) ); ?>" class="delete" onclick="return window.confirm(<?php echo esc_attr( wp_json_encode( __( 'Instellingen en gegevens van deze module definitief verwijderen?', 'hashtagmedia-toolkit' ) ) ); ?>);"><?php esc_html_e( 'Gegevens opruimen', 'hashtagmedia-toolkit' ); ?></a>
-								<?php endif; ?>
-							</td>
-						</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
+			<ul class="hm-modules">
+				<?php foreach ( $found as $slug => $meta ) : ?>
+					<?php
+					$enabled = Settings::is_enabled( $slug );
+					$loaded  = Registry::get( $slug );
+					$id      = 'hm-module-' . $slug;
+					?>
+					<li class="hm-module<?php echo $enabled ? ' is-enabled' : ''; ?>">
+						<div class="hm-module__main">
+							<label class="hm-module__name" for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $meta['name'] ); ?></label>
+							<p class="hm-module__description" id="<?php echo esc_attr( $id . '-description' ); ?>"><?php echo esc_html( $meta['description'] ); ?></p>
+							<?php if ( $enabled && $loaded && $loaded->has_tab() ) : ?>
+								<a class="hm-module__link" href="<?php echo esc_url( self::url( $slug ) ); ?>"><?php esc_html_e( 'Instellingen', 'hashtagmedia-toolkit' ); ?></a>
+							<?php elseif ( ! $enabled && Settings::has_module_settings( $slug ) ) : ?>
+								<a class="hm-module__link hm-module__link--delete" href="<?php echo esc_url( self::cleanup_url( $slug ) ); ?>" onclick="return window.confirm(<?php echo esc_attr( wp_json_encode( __( 'Instellingen en gegevens van deze module definitief verwijderen?', 'hashtagmedia-toolkit' ) ) ); ?>);"><?php esc_html_e( 'Gegevens opruimen', 'hashtagmedia-toolkit' ); ?></a>
+							<?php endif; ?>
+						</div>
+						<span class="hm-toggle">
+							<input type="checkbox" role="switch" class="hm-toggle__input" id="<?php echo esc_attr( $id ); ?>" name="modules[]" value="<?php echo esc_attr( $slug ); ?>" aria-describedby="<?php echo esc_attr( $id . '-description' ); ?>" <?php checked( $enabled ); ?>>
+						</span>
+					</li>
+				<?php endforeach; ?>
+			</ul>
 
 			<?php submit_button( __( 'Modules opslaan', 'hashtagmedia-toolkit' ) ); ?>
 		</form>

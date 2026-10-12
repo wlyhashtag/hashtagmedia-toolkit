@@ -67,6 +67,33 @@ De kern laadt bij elk verzoek alleen de modules die aanstaan. De modulemap wordt
 - **Uitzetten** laat de instellingen staan. **Gegevens opruimen** (tabblad Modules) draait `uninstall.php` van de module. **Een module weghalen:** eerst opruimen, dan pas de map verwijderen.
 - **HashtagMedia-beheerder** = `manage_options`; zie `hm_toolkit_is_agency_user()`.
 
+## Hooks van de kern en modules
+
+| Hook | Soort | Waarvoor |
+| --- | --- | --- |
+| `hm_toolkit_modules_loaded` | action | Alle actieve modules zijn geladen. |
+| `hm_toolkit_company_name` | filter | Bedrijfsnaam van de klant (standaard de sitenaam). Bedrijfsgegevens vult deze later. |
+| `hm_toolkit_dashboard_actions` | filter | Snelle acties op het dashboard: `label`, `url`, `icon` (dashicon). |
+| `hm_toolkit_environment_type` | filter | Omgevingstype (local, development, staging, production). |
+
+## Omgevingslabel
+
+Het label in de adminbalk wordt automatisch bepaald aan de hand van het domein:
+
+| Domein | Label |
+| --- | --- |
+| `klant.nl`, `www.klant.nl` | Live |
+| `staging.klant.nl`, `klant.hostingbedrijf.nl` | Staging |
+| `localhost`, IP-adres, `.local`, `.test` | Lokaal |
+
+Staat `WP_ENVIRONMENT_TYPE` in `wp-config.php`, dan gaat die altijd voor. Dat is alleen nodig als een live site zelf op een subdomein draait, bijvoorbeeld `shop.klant.nl`:
+
+```php
+define( 'WP_ENVIRONMENT_TYPE', 'production' );
+```
+
+Het label wordt bij elk verzoek opnieuw bepaald en staat niet in de database, dus na verhuizen met Duplicator klopt het meteen. Filter: `hm_toolkit_environment_type`.
+
 ## Kwaliteit
 
 ```
