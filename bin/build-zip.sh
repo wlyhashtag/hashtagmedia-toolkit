@@ -12,7 +12,7 @@ mkdir -p "$TMP/hashtagmedia-toolkit" dist
 rsync -a \
 	--exclude '.git' --exclude '.github' --exclude '.gitattributes' --exclude '.gitignore' \
 	--exclude 'composer.json' --exclude 'composer.lock' --exclude 'vendor' \
-	--exclude 'phpcs.xml.dist' --exclude 'README.md' --exclude 'PLAN.md' \
+	--exclude 'phpcs.xml.dist' --exclude 'README.md' --exclude 'PLAN.md' --exclude 'THEMA-AFSPRAKEN.md' \
 	--exclude 'bin' --exclude 'dist' --exclude '.gitkeep' --exclude '.DS_Store' \
 	./ "$TMP/hashtagmedia-toolkit/"
 ( cd "$TMP" && zip -rqX plugin.zip hashtagmedia-toolkit )

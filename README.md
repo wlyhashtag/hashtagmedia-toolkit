@@ -1,6 +1,6 @@
 # HashtagMedia Toolkit
 
-Eén plugin voor alle klantsites van HashtagMedia met een custom thema: een kleine kern plus losse modules. Het volledige plan staat in `PLAN.md`.
+Eén plugin voor alle klantsites van HashtagMedia met een custom thema: een kleine kern plus losse modules. Het volledige plan staat in `PLAN.md`; wat in de plugin en wat in het thema hoort, staat in `THEMA-AFSPRAKEN.md`.
 
 ## Opbouw
 

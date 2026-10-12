@@ -7,4 +7,5 @@
 /phpcs.xml.dist   export-ignore
 /README.md        export-ignore
 /PLAN.md          export-ignore
+/THEMA-AFSPRAKEN.md export-ignore
 /bin              export-ignore
