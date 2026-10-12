@@ -121,6 +121,20 @@
 	color: #8a2424;
 }
 
+/* Lijst met schakelaars (bijv. pagina's kiezen). */
+.hm-checklist {
+	display: grid;
+	gap: 10px;
+	max-width: 720px;
+	max-height: 360px;
+	overflow: auto;
+	margin: 0;
+	padding: 14px 16px;
+	border: 1px solid var(--hm-border);
+	border-radius: 8px;
+	background: #fff;
+}
+
 /* Instellingen van een module. */
 .hm-toolkit-page .form-table {
 	margin-bottom: 8px;

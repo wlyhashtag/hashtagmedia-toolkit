@@ -112,6 +112,14 @@ Hoofdmenu-items slepen (of met de pijltjes verplaatsen) en hoofd- of submenu-ite
 
 Verbergen is alleen weergave; wat een klant mag, regelt de module Klantrol met rechten.
 
+## Module Content
+
+- **Dupliceren als concept**: alle meta (ACF-velden, Yoast, uitgelichte afbeelding, paginasjabloon) en taxonomieën gaan mee. Action: `hm_toolkit_post_duplicated`.
+- **SVG-upload**: alleen voor HashtagMedia-beheerders. Elke SVG gaat door `enshrined/svg-sanitize` (gebundeld in `modules/content/lib/svg-sanitizer`, zie `VERSION.txt`). Lukt saneren niet, dan wordt de upload geweigerd.
+- **Gutenberg uit**: klassieke editor, klassieke widgets, geen blok-CSS en globale stijlen op de frontend.
+- **Revisies**: standaard maximaal 5 per bericht.
+- **Beschermde pagina's**: klanten kunnen ze niet verwijderen. Homepage, berichtenpagina en privacyverklaring zijn altijd beschermd; andere kies je op het tabblad.
+
 ## Module Opruimen: pluginprofielen
 
 Per plugin staat er één bestand in `modules/opruimen/profiles/`. Brengt een plugin-update reclame terug? Pas dan alleen dat profiel aan. Een nieuw profiel is een nieuw bestand; het verschijnt vanzelf als schakelaar.

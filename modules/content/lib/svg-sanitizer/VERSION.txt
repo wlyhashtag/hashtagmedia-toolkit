@@ -1,0 +1,4 @@
+enshrined/svg-sanitize 1.0.0
+https://github.com/darylldoyle/svg-sanitizer
+GPL-2.0-or-later. Ongewijzigd overgenomen (zonder svg-scanner.php en tests).
+Bijwerken: nieuwe release-tag ophalen en de map src/ hier vervangen.

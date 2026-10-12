@@ -246,18 +246,19 @@ abstract class Module {
 	 *
 	 * @param string $key         Sleutel van de instelling.
 	 * @param string $label       Label links.
-	 * @param string $type        text, email of url.
+	 * @param string $type        text, email, url of number.
 	 * @param string $description Optionele uitleg eronder.
 	 * @param string $placeholder Optionele placeholder.
 	 */
 	final protected function input_row( string $key, string $label, string $type = 'text', string $description = '', string $placeholder = '' ): void {
-		$id   = $this->field_id( $key );
-		$type = in_array( $type, array( 'text', 'email', 'url' ), true ) ? $type : 'text';
+		$id    = $this->field_id( $key );
+		$type  = in_array( $type, array( 'text', 'email', 'url', 'number' ), true ) ? $type : 'text';
+		$class = 'number' === $type ? 'small-text' : 'regular-text';
 		?>
 		<tr>
 			<th scope="row"><label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $label ); ?></label></th>
 			<td>
-				<input type="<?php echo esc_attr( $type ); ?>" class="regular-text" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $this->field_name( $key ) ); ?>" value="<?php echo esc_attr( (string) $this->get( $key, '' ) ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>"<?php echo $description ? ' aria-describedby="' . esc_attr( $id . '-description' ) . '"' : ''; ?>>
+				<input type="<?php echo esc_attr( $type ); ?>" class="<?php echo esc_attr( $class ); ?>"<?php echo 'number' === $type ? ' min="0" step="1"' : ''; ?> id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $this->field_name( $key ) ); ?>" value="<?php echo esc_attr( (string) $this->get( $key, '' ) ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>"<?php echo $description ? ' aria-describedby="' . esc_attr( $id . '-description' ) . '"' : ''; ?>>
 				<?php if ( '' !== $description ) : ?>
 					<p class="description" id="<?php echo esc_attr( $id . '-description' ); ?>"><?php echo esc_html( $description ); ?></p>
 				<?php endif; ?>
