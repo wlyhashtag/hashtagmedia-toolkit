@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       HashtagMedia Toolkit
  * Description:       Beheer, opruiming en huisstijl voor websites van HashtagMedia.
- * Version:           0.6.0
+ * Version:           0.7.0
  * Requires at least: 6.5
  * Requires PHP:      8.1
  * Author:            HashtagMedia
@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
  * Publieke constanten. Thema's kunnen met defined( 'HM_TOOLKIT_VERSION' )
  * controleren of de plugin actief is.
  */
-define( 'HM_TOOLKIT_VERSION', '0.6.0' );
+define( 'HM_TOOLKIT_VERSION', '0.7.0' );
 define( 'HM_TOOLKIT_FILE', __FILE__ );
 define( 'HM_TOOLKIT_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HM_TOOLKIT_URL', plugin_dir_url( __FILE__ ) );
@@ -33,6 +33,7 @@ require_once HM_TOOLKIT_DIR . 'includes/class-module.php';
 require_once HM_TOOLKIT_DIR . 'includes/class-registry.php';
 require_once HM_TOOLKIT_DIR . 'includes/class-plugin.php';
 require_once HM_TOOLKIT_DIR . 'includes/functions.php';
+require_once HM_TOOLKIT_DIR . 'includes/theme-helpers.php';
 
 register_activation_hook( __FILE__, array( Plugin::class, 'activate' ) );
 

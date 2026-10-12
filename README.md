@@ -75,6 +75,8 @@ De kern laadt bij elk verzoek alleen de modules die aanstaan. De modulemap wordt
 | `hm_toolkit_company_name` | filter | Bedrijfsnaam van de klant (standaard de sitenaam). Het thema vult deze vanuit zijn optiepagina. |
 | `hm_toolkit_dashboard_actions` | filter | Snelle acties op het dashboard: `label`, `url`, `icon` (dashicon). |
 | `hm_toolkit_environment_type` | filter | Omgevingstype (local, development, staging, production). |
+| `hm_toolkit_image_attr` | filter | Attributen van `hm_image()` aanpassen. |
+| `hm_toolkit_image_focus` | filter | Focuspunt als CSS-waarde (module Afbeeldingen vult dit). |
 
 ## Omgevingslabel
 
@@ -146,6 +148,25 @@ Eén rol **Klant** (`hm_klant`).
 - **Opruimen**: rol weg, klanten worden Abonnee.
 
 Wijzig je de rechten in `STORED_CAPS`, verhoog dan `ROLE_VERSION`; de rol wordt dan op elke site bijgewerkt.
+
+## Module Afbeeldingen
+
+- **WebP**: JPEG en PNG worden bij uploaden WebP via WordPress' eigen filter `image_editor_output_format`; het origineel blijft bewaard (`original_image`). Kwaliteit instelbaar (standaard 82). Controleert of de server WebP kan maken.
+- **Maximaal 2560 px** (`big_image_size_threshold`); 2560 telt ook mee in `srcset`.
+- **Formaten**, proportioneel en nooit bijgesneden: 480 (`medium`), 768 (`medium_large`), 1200 (`large`), 1600 (`hm-1600`) en de volledige afbeelding. Het vierkante miniatuur (150) blijft voor de mediabibliotheek; 1536 en 2048 vervallen. Alleen voor nieuwe uploads.
+- **Focuspunt** per afbeelding, te kiezen in de mediabibliotheek (klikken of pijltjestoetsen). Opgeslagen als post-meta `_hm_focus`.
+
+Thema-helpers (altijd beschikbaar via de kern; zonder de module een gewone WordPress-afbeelding):
+
+```php
+hm_image( $image_id_of_acf_veld );                                   // toont <img> met srcset, sizes, breedte/hoogte, lazy loading
+hm_image( $id, array( 'size' => 'full', 'priority' => true ) );     // hero: geen lazy loading, fetchpriority="high"
+hm_image( $id, array( 'fit' => 'cover', 'sizes' => '(min-width: 1024px) 50vw, 100vw', 'class' => 'card__img' ) );
+$html = hm_get_image( $id, $args );                                 // geeft de HTML terug
+$pos  = hm_image_focus( $id );                                      // '30% 65%', voor background-position
+```
+
+`fit` zet `object-fit` en het focuspunt als `object-position`; het thema geeft de afbeelding zelf een vaste hoogte of aspect-ratio.
 
 ## Module Opruimen: pluginprofielen
 
