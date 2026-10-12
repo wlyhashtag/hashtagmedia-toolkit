@@ -96,10 +96,10 @@ Het label wordt bij elk verzoek opnieuw bepaald en staat niet in de database, du
 
 ## Versies en releases
 
-- Elke versie krijgt een tag `vX.Y.Z` op de commit waarin het versienummer in `hashtagmedia-toolkit.php` is verhoogd.
-- `./bin/build-zip.sh` maakt `dist/hashtagmedia-toolkit-X.Y.Z.zip` om te uploaden; oude zips worden daarbij opgeruimd. `dist/` staat niet in git.
-- Een oude versie nodig? Check de tag uit en draai het bouwscript opnieuw.
-- Later (GitHub-updater): bij een nieuwe tag maakt GitHub automatisch een release met de zip.
+- **Automatisch via GitHub** (`.github/workflows/release.yml`): bij elke push naar `main` draait eerst PHPCS. Is het versienummer in `hashtagmedia-toolkit.php` nieuw, dan maakt GitHub zelf de tag `vX.Y.Z` en een release met de zip. Faalt PHPCS, dan komt er geen release.
+- Een nieuwe versie uitbrengen = versienummer verhogen (header én `HM_TOOLKIT_VERSION`), committen, pushen.
+- Lokaal testen: `./bin/build-zip.sh` maakt `dist/hashtagmedia-toolkit-X.Y.Z.zip`; oude zips worden daarbij opgeruimd. `dist/` staat niet in git.
+- Een oude versie nodig? Download de zip bij de release op GitHub.
 
 ## Kwaliteit
 
@@ -126,6 +126,14 @@ Verbergen is alleen weergave; wat een klant mag, regelt de module Klantrol met r
 - **Gutenberg uit**: klassieke editor, klassieke widgets, geen blok-CSS en globale stijlen op de frontend.
 - **Revisies**: standaard maximaal 5 per bericht.
 - **Beschermde pagina's**: klanten kunnen ze niet verwijderen. Homepage, berichtenpagina en privacyverklaring zijn altijd beschermd; andere kies je op het tabblad.
+
+## Module Basisbeveiliging
+
+- **XML-RPC uit**: `xmlrpc.php` geeft 403, pingbacks en RSD-link weg.
+- **Bestandseditors uit**: thema- en plugin-editor voor iedereen weg (zoals `DISALLOW_FILE_EDIT`).
+- **WordPress-versie verborgen**: geen generator-tag, en `?ver=` met de WP-versie wordt een korte hash. `readme.html` kan alleen de server blokkeren.
+
+Loginbeveiliging, 2FA en firewall: Wordfence.
 
 ## Module Opruimen: pluginprofielen
 
