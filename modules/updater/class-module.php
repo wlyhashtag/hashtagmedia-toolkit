@@ -74,7 +74,7 @@ final class Module extends Base {
 	 * Laatste release van GitHub (uit de cache als die er is).
 	 *
 	 * @param bool $force Cache overslaan.
-	 * @return array{version:string,package:string,url:string,notes:string,date:string}|null
+	 * @return array{version:string,package:string,url:string,notes:string,date:string,checked?:int}|null
 	 */
 	public static function release( bool $force = false ): ?array {
 		$cached = $force ? false : get_site_transient( self::CACHE );
@@ -83,8 +83,18 @@ final class Module extends Base {
 		}
 
 		$release = self::fetch();
+		if ( null !== $release ) {
+			$release['checked'] = time();
+		}
 		// Bij een fout een lege waarde bewaren, zodat we GitHub niet blijven bestoken.
-		set_site_transient( self::CACHE, $release ?? array( 'error' => true ), $release ? 12 * HOUR_IN_SECONDS : HOUR_IN_SECONDS );
+		set_site_transient(
+			self::CACHE,
+			$release ?? array(
+				'error'   => true,
+				'checked' => time(),
+			),
+			$release ? 12 * HOUR_IN_SECONDS : HOUR_IN_SECONDS
+		);
 		return $release;
 	}
 
@@ -241,7 +251,14 @@ final class Module extends Base {
 			$line = trim( $line );
 			$text = esc_html( $line );
 			$text = (string) preg_replace( '/\*\*(.+?)\*\*/', '<strong>$1</strong>', $text );
-			$text = make_clickable( $text );
+			$text = (string) preg_replace_callback(
+				'#https://[^\s<]+#',
+				static function ( $m ) {
+					$url = html_entity_decode( $m[0] );
+					return '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( $url ) . '</a>';
+				},
+				$text
+			);
 			$item = preg_match( '/^[*-]\s+/', $line );
 
 			if ( $list && ! $item ) {
@@ -385,6 +402,21 @@ final class Module extends Base {
 							&nbsp;<span class="description"><?php esc_html_e( 'Je hebt de nieuwste versie.', 'hashtagmedia-toolkit' ); ?></span>
 						<?php endif; ?>
 					<?php endif; ?>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Laatst gecontroleerd', 'hashtagmedia-toolkit' ); ?></th>
+				<td>
+					<?php
+					$cache   = get_site_transient( self::CACHE );
+					$checked = is_array( $cache ) ? (int) ( $cache['checked'] ?? 0 ) : 0;
+					echo esc_html(
+						$checked
+							/* translators: %s: tijdsduur, bv. "5 minuten" */
+							? sprintf( __( '%s geleden', 'hashtagmedia-toolkit' ), human_time_diff( $checked ) )
+							: __( 'Onbekend', 'hashtagmedia-toolkit' )
+					);
+					?>
 				</td>
 			</tr>
 			<tr>
