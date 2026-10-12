@@ -77,6 +77,7 @@ De kern laadt bij elk verzoek alleen de modules die aanstaan. De modulemap wordt
 | `hm_toolkit_environment_type` | filter | Omgevingstype (local, development, staging, production). |
 | `hm_toolkit_image_attr` | filter | Attributen van `hm_image()` aanpassen. |
 | `hm_toolkit_image_focus` | filter | Focuspunt als CSS-waarde (module Afbeeldingen vult dit). |
+| `hm_toolkit_shortcuts` | filter | Groepen snelkoppelingen, in de vorm van `modules/snelkoppelingen/links.php`. |
 
 ## Omgevingslabel
 
@@ -167,6 +168,14 @@ $pos  = hm_image_focus( $id );                                      // '30% 65%'
 ```
 
 `fit` zet `object-fit` en het focuspunt als `object-position`; het thema geeft de afbeelding zelf een vaste hoogte of aspect-ratio.
+
+## Module Snelkoppelingen
+
+Knoppen naar de juiste plek in Complianz, Yoast, Gravity Forms, WP Rocket (ook "Cache legen"), Wordfence, Duplicator, FluentSMTP en de ACF-optiepagina's van het thema. Alleen HashtagMedia-beheerders zien ze: op het tabblad Snelkoppelingen en in een blok op het dashboard (uit te zetten).
+
+- Een knop verschijnt alleen als de plugin actief is.
+- **Alle adressen staan in `modules/snelkoppelingen/links.php`.** Wijzigt een plugin zijn adressen na een update, pas dan alleen dat bestand aan.
+- De optiepagina's van het thema worden vanzelf gevonden via ACF.
 
 ## Module Opruimen: pluginprofielen
 

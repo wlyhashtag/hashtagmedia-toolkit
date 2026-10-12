@@ -1,0 +1,72 @@
+/**
+ * Snelkoppelingen: tabblad en dashboardblok.
+ */
+
+/* Tabblad: kaarten per plugin. */
+.hm-shortcuts {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 12px;
+	margin: 16px 0;
+}
+
+.hm-shortcuts__card {
+	padding: 16px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.hm-shortcuts .hm-shortcuts__title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 12px;
+	padding: 0;
+	font-size: 14px;
+}
+
+.hm-shortcuts__title .dashicons,
+.hm-shortcuts-list__name .dashicons {
+	color: var(--wp-admin-theme-color, #3858e9);
+}
+
+.hm-shortcuts__links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+/* Dashboardblok: compacte lijst. */
+.hm-shortcuts-list {
+	margin: 0;
+}
+
+.hm-shortcuts-list li {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 12px;
+	margin: 0;
+	padding: 8px 0;
+	border-top: 1px solid #f0f0f1;
+}
+
+.hm-shortcuts-list li:first-child {
+	padding-top: 0;
+	border-top: 0;
+}
+
+.hm-shortcuts-list__name {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 130px;
+	font-weight: 600;
+}
+
+.hm-shortcuts-list__links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
