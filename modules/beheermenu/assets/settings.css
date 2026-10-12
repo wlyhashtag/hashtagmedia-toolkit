@@ -1,0 +1,98 @@
+/**
+ * Beheermenu: sleepbare lijst op het instellingentabblad.
+ */
+
+.hm-menu-help {
+	margin: 0 0 16px 18px;
+	list-style: disc;
+}
+
+.hm-menu-list {
+	max-width: 720px;
+	margin: 0;
+	list-style: none;
+}
+
+.hm-menu-item {
+	margin: 0 0 6px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.hm-menu-item.is-separator {
+	border-style: dashed;
+	background: transparent;
+}
+
+.hm-menu-item.is-separator .hm-menu-item__title {
+	color: #646970;
+	font-style: italic;
+}
+
+.hm-menu-item__row,
+.hm-menu-sub__item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 12px;
+}
+
+.hm-menu-item__handle {
+	color: #8c8f94;
+	cursor: grab;
+}
+
+.hm-menu-item__title {
+	flex: 1;
+	min-width: 0;
+	font-weight: 500;
+}
+
+.hm-menu-item__actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.hm-menu-move {
+	color: #50575e;
+}
+
+.hm-menu-move:hover,
+.hm-menu-move:focus {
+	color: var(--wp-admin-theme-color, #3858e9);
+}
+
+.hm-menu-expand {
+	margin-right: 6px;
+}
+
+.hm-menu-sub {
+	margin: 0;
+	padding: 0 0 6px 38px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.hm-menu-sub__item {
+	padding: 6px 12px 6px 0;
+}
+
+.hm-menu-sub__item .hm-menu-item__title {
+	font-weight: 400;
+}
+
+.hm-menu-item.ui-sortable-helper {
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.hm-menu-placeholder {
+	height: 40px;
+	margin: 0 0 6px;
+	border: 2px dashed var(--wp-admin-theme-color, #3858e9);
+	border-radius: 8px;
+}
+
+.hm-menu-reset {
+	margin-top: 16px;
+}

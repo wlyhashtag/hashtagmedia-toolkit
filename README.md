@@ -102,6 +102,16 @@ composer lint     # PHPCS met WordPress Coding Standards + PHPCompatibilityWP
 composer fix      # Automatisch herstelbare fouten oplossen
 ```
 
+## Module Beheermenu
+
+Hoofdmenu-items slepen (of met de pijltjes verplaatsen) en hoofd- of submenu-items verbergen.
+
+- Klanten zien verborgen items helemaal niet.
+- HashtagMedia-beheerders vinden ze onder "Alles tonen" onderaan het menu. De keuze wordt per browser onthouden.
+- Nieuwe menu-items van plugins komen vanzelf onderaan.
+
+Verbergen is alleen weergave; wat een klant mag, regelt de module Klantrol met rechten.
+
 ## Module Opruimen: pluginprofielen
 
 Per plugin staat er één bestand in `modules/opruimen/profiles/`. Brengt een plugin-update reclame terug? Pas dan alleen dat profiel aan. Een nieuw profiel is een nieuw bestand; het verschijnt vanzelf als schakelaar.

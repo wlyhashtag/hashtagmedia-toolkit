@@ -1,0 +1,24 @@
+/**
+ * Beheermenu: verborgen items voor beheerders achter "Alles tonen".
+ */
+
+html:not(.hm-menu-show-all) #adminmenu li.hm-menu-hidden:not(.current):not(.wp-has-current-submenu):not(.wp-menu-open) {
+	display: none;
+}
+
+html.hm-menu-show-all #adminmenu li.hm-menu-hidden > a {
+	opacity: 0.6;
+}
+
+#adminmenu li.hm-menu-hidden.current > a,
+#adminmenu .wp-submenu li.hm-menu-hidden.current > a {
+	opacity: 1;
+}
+
+#adminmenu #hm-menu-toggle .wp-menu-image::before {
+	content: "\f177"; /* dashicons-visibility */
+}
+
+html.hm-menu-show-all #adminmenu #hm-menu-toggle .wp-menu-image::before {
+	content: "\f530"; /* dashicons-hidden */
+}
