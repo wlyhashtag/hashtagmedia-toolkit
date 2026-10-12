@@ -135,6 +135,18 @@ Verbergen is alleen weergave; wat een klant mag, regelt de module Klantrol met r
 
 Loginbeveiliging, 2FA en firewall: Wordfence.
 
+## Module Klantrol (beveiligingsgevoelig)
+
+Eén rol **Klant** (`hm_klant`).
+
+- **In de rol opgeslagen** (veilig zonder deze module): content, media, categorieën, Gravity Forms-inzendingen en formulieren bewerken.
+- **Alleen tijdens het draaien** (`user_has_cap`): menu's en widgets, en collega's beheren. Module uit of weg = deze rechten vervallen vanzelf.
+- **Collega's**: alleen andere klanten zien, aanmaken, bewerken, verwijderen. `editable_roles` geeft alleen Klant; `map_meta_cap` blokkeert elke andere doelgebruiker; vangnet op `user_register`, `set_user_role` en `add_user_role`. Zichzelf verwijderen of een rol geven kan niet.
+- **Nooit**: `unfiltered_html`, plugins, thema's, Customizer, instellingen, export/import, GF-instellingen en formulieren aanmaken/verwijderen.
+- **Opruimen**: rol weg, klanten worden Abonnee.
+
+Wijzig je de rechten in `STORED_CAPS`, verhoog dan `ROLE_VERSION`; de rol wordt dan op elke site bijgewerkt.
+
 ## Module Opruimen: pluginprofielen
 
 Per plugin staat er één bestand in `modules/opruimen/profiles/`. Brengt een plugin-update reclame terug? Pas dan alleen dat profiel aan. Een nieuw profiel is een nieuw bestand; het verschijnt vanzelf als schakelaar.

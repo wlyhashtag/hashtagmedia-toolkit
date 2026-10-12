@@ -135,6 +135,26 @@
 	background: #fff;
 }
 
+/* Samenvatting van rechten (Klantrol). */
+.hm-role-summary {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	gap: 16px;
+	margin: 16px 0;
+}
+
+.hm-role-summary > div {
+	padding: 4px 20px 12px;
+	border: 1px solid var(--hm-border);
+	border-radius: 8px;
+	background: #fff;
+}
+
+.hm-role-summary ul {
+	margin-left: 18px;
+	list-style: disc;
+}
+
 /* Instellingen van een module. */
 .hm-toolkit-page .form-table {
 	margin-bottom: 8px;
