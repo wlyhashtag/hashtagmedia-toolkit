@@ -108,7 +108,7 @@ final class Admin_Page {
 
 		foreach ( Registry::loaded() as $slug => $module ) {
 			if ( $module->has_tab() && isset( $found[ $slug ] ) ) {
-				$tabs[ $slug ] = $found[ $slug ]['name'];
+				$tabs[ $slug ] = $found[ $slug ]['tab'];
 			}
 		}
 

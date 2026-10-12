@@ -136,6 +136,7 @@ final class Registry {
 			'name'        => (string) $meta['name'],
 			'description' => isset( $meta['description'] ) ? (string) $meta['description'] : '',
 			'default'     => ! empty( $meta['default'] ),
+			'tab'         => isset( $meta['tab'] ) ? (string) $meta['tab'] : (string) $meta['name'],
 		);
 	}
 

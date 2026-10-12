@@ -2,11 +2,12 @@
 /**
  * Plugin Name:       HashtagMedia Toolkit
  * Description:       Beheer, opruiming en huisstijl voor websites van HashtagMedia.
- * Version:           0.9.0
+ * Version:           0.10.0
  * Requires at least: 6.5
  * Requires PHP:      8.1
  * Author:            HashtagMedia
  * Author URI:        https://hashtagmedia.nl
+ * Update URI:        https://github.com/wlyhashtag/hashtagmedia-toolkit
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       hashtagmedia-toolkit
@@ -23,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
  * Publieke constanten. Thema's kunnen met defined( 'HM_TOOLKIT_VERSION' )
  * controleren of de plugin actief is.
  */
-define( 'HM_TOOLKIT_VERSION', '0.9.0' );
+define( 'HM_TOOLKIT_VERSION', '0.10.0' );
 define( 'HM_TOOLKIT_FILE', __FILE__ );
 define( 'HM_TOOLKIT_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HM_TOOLKIT_URL', plugin_dir_url( __FILE__ ) );

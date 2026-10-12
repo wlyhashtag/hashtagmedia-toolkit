@@ -32,6 +32,7 @@ De kern laadt bij elk verzoek alleen de modules die aanstaan. De modulemap wordt
    	'name'        => __( 'Naam', 'hashtagmedia-toolkit' ),
    	'description' => __( 'Eén regel uitleg.', 'hashtagmedia-toolkit' ),
    	'default'     => true, // Standaard aan of uit.
+   	'tab'         => __( 'Kort', 'hashtagmedia-toolkit' ), // Optioneel: kortere naam op het tabblad.
    );
    ```
 
@@ -105,7 +106,7 @@ Het label wordt bij elk verzoek opnieuw bepaald en staat niet in de database, du
 ## Versies en releases
 
 - **Automatisch via GitHub** (`.github/workflows/release.yml`): bij elke push naar `main` draait eerst PHPCS. Is het versienummer in `hashtagmedia-toolkit.php` nieuw, dan maakt GitHub zelf de tag `vX.Y.Z` en een release met de zip. Faalt PHPCS, dan komt er geen release.
-- Een nieuwe versie uitbrengen = versienummer verhogen (header én `HM_TOOLKIT_VERSION`), committen, pushen.
+- Een nieuwe versie uitbrengen = versienummer verhogen (header én `HM_TOOLKIT_VERSION`), committen, pushen. Sites zien de update daarna vanzelf (module Updates), uiterlijk binnen 12 uur.
 - Lokaal testen: `./bin/build-zip.sh` maakt `dist/hashtagmedia-toolkit-X.Y.Z.zip`; oude zips worden daarbij opgeruimd. `dist/` staat niet in git.
 - Een oude versie nodig? Download de zip bij de release op GitHub.
 
@@ -189,6 +190,14 @@ Knoppen naar de juiste plek in Complianz, Yoast, Gravity Forms, WP Rocket (ook "
 - **Importeren**: zo'n bestand uploaden (maximaal 500 KB). Elke module saneert zijn eigen waarden; onbekende modules en sleutels worden overgeslagen.
 - **Gaat nooit mee**: wat per site verschilt (contactgegevens, bereikbaarheid, handleiding-link, beschermde pagina's) en interne waarden (rolversie). Die blijven op de site zoals ze zijn.
 - Alleen de toolkit; Yoast, WP Rocket, Complianz en Gravity Forms hebben hun eigen export.
+
+## Module Updates
+
+- De pluginkop heeft `Update URI: https://github.com/wlyhashtag/hashtagmedia-toolkit`. WordPress vraagt daardoor via `update_plugins_github.com` of er een update is, en een plugin met dezelfde naam op wordpress.org kan nooit over deze heen.
+- De module kijkt naar de nieuwste release op GitHub (geen concept of testversie) en gebruikt alleen de zip `hashtagmedia-toolkit-X.Y.Z.zip` uit deze repo. Gegevens worden 12 uur bewaard (bij een fout 1 uur).
+- De update verschijnt onder Plugins, Dashboard › Updates en in ManageWP. Automatische updates aan- of uitzetten gaat per site onder Plugins.
+- Tabblad Updates: geïnstalleerde en nieuwste versie, en de knop "Nu controleren".
+- **De repo moet openbaar blijven**; anders kunnen sites de releases niet zien.
 
 ## Module Opruimen: pluginprofielen
 
