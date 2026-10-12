@@ -16,9 +16,9 @@ html.hm-menu-show-all #adminmenu li.hm-menu-hidden > a {
 }
 
 #adminmenu #hm-menu-toggle .wp-menu-image::before {
-	content: "\f177"; /* dashicons-visibility */
+	content: "\f347"; /* dashicons-arrow-down-alt2 */
 }
 
 html.hm-menu-show-all #adminmenu #hm-menu-toggle .wp-menu-image::before {
-	content: "\f530"; /* dashicons-hidden */
+	content: "\f343"; /* dashicons-arrow-up-alt2 */
 }
