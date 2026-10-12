@@ -41,6 +41,19 @@ final class Module extends Base {
 	}
 
 	/**
+	 * Per site anders: gaan niet mee bij exporteren en importeren.
+	 *
+	 * @return string[]
+	 */
+	public function site_settings(): array {
+		return array(
+			'contact_email',
+			'contact_hours',
+			'manual_url',
+		);
+	}
+
+	/**
 	 * Bedrijfsnaam van de klant. De module Bedrijfsgegevens kan deze via het
 	 * filter hm_toolkit_company_name aanvullen; anders de sitenaam.
 	 *
@@ -346,6 +359,20 @@ final class Module extends Base {
 			?>
 		</table>
 		<?php
+	}
+
+	/**
+	 * Import: dezelfde regels als het tabblad voor e-mail.
+	 *
+	 * @param array $values Waarden uit het bestand.
+	 * @return array
+	 */
+	public function import_settings( array $values ): array {
+		$clean = parent::import_settings( $values );
+		if ( isset( $clean['support_email'] ) ) {
+			$clean['support_email'] = sanitize_email( (string) $clean['support_email'] );
+		}
+		return $clean;
 	}
 
 	/**

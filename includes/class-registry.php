@@ -191,6 +191,18 @@ final class Registry {
 	}
 
 	/**
+	 * Een module-object, ook als de module uitstaat. Een niet-geladen module
+	 * wordt aangemaakt maar niet gestart (geen boot of admin): alleen voor
+	 * het lezen van standaardwaarden en het saneren van instellingen.
+	 *
+	 * @param string $slug Slug.
+	 * @return Module|null
+	 */
+	public static function instance( string $slug ): ?Module {
+		return self::$loaded[ $slug ] ?? self::instantiate( $slug );
+	}
+
+	/**
 	 * Een geladen module (alleen voor de kern zelf).
 	 *
 	 * @param string $slug Slug.

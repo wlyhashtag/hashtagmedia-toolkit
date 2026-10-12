@@ -1,0 +1,70 @@
+{
+    "plugin": "hashtagmedia-toolkit",
+    "format": 1,
+    "version": "0.9.0",
+    "exported": "2026-10-12T00:00:00+00:00",
+    "site": "HashtagMedia-standaard",
+    "modules": {
+        "afbeeldingen": true,
+        "beveiliging": true,
+        "beheermenu": true,
+        "content": true,
+        "huisstijl": true,
+        "export-import": true,
+        "klantrol": true,
+        "opruimen": true,
+        "snelkoppelingen": true
+    },
+    "settings": {
+        "afbeeldingen": {
+            "webp": true,
+            "quality": 82,
+            "sizes": true,
+            "focus": true
+        },
+        "beveiliging": {
+            "xmlrpc": true,
+            "file_edit": true,
+            "hide_version": true
+        },
+        "beheermenu": {
+            "order": [],
+            "hidden": [],
+            "hidden_sub": []
+        },
+        "content": {
+            "duplicate": true,
+            "svg": true,
+            "gutenberg_off": true,
+            "limit_revisions": true,
+            "revisions": 5,
+            "protect": true
+        },
+        "huisstijl": {
+            "login": true,
+            "scheme": true,
+            "footer": true,
+            "environment": true,
+            "dashboard": true
+        },
+        "klantrol": {
+            "colleagues": true
+        },
+        "opruimen": {
+            "notices": true,
+            "dashboard": true,
+            "adminbar": true,
+            "comments": true,
+            "ad_links": true,
+            "footer": true,
+            "profile_complianz": true,
+            "profile_duplicator": true,
+            "profile_gravityforms": true,
+            "profile_wordfence": true,
+            "profile_yoast": true
+        },
+        "snelkoppelingen": {
+            "dashboard": true
+        }
+    }
+}

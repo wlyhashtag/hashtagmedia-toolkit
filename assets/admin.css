@@ -29,6 +29,15 @@
 	white-space: nowrap;
 }
 
+/* Laptopbreedte: tabbladen iets compacter, zodat ze naast elkaar passen. */
+@media screen and (max-width: 1400px) {
+	.hm-toolkit-page .nav-tab {
+		margin-left: 4px;
+		padding: 5px 8px;
+		font-size: 13px;
+	}
+}
+
 @media screen and (max-width: 782px) {
 	.hm-toolkit-page .nav-tab-wrapper {
 		margin-right: -10px;

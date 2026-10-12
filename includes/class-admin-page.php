@@ -71,7 +71,7 @@ final class Admin_Page {
 				wp_enqueue_script( 'hm-toolkit-admin' );
 				wp_add_inline_script(
 					'hm-toolkit-admin',
-					"(function(){var n=document.querySelector('.hm-toolkit-page .nav-tab-wrapper'),a=n&&n.querySelector('.nav-tab-active');if(a&&n.scrollWidth>n.clientWidth){n.scrollLeft=a.offsetLeft-n.offsetLeft-(n.clientWidth-a.offsetWidth)/2;}}());"
+					"(function(){var n=document.querySelector('.hm-toolkit-page .nav-tab-wrapper'),a=n&&n.querySelector('.nav-tab-active');if(a){var r=a.offsetLeft-n.offsetLeft+a.offsetWidth+24-n.clientWidth;if(r>0){n.scrollLeft=r;}}}());"
 				);
 			}
 		);
@@ -238,6 +238,10 @@ final class Admin_Page {
 		if ( null === $module ) {
 			return;
 		}
+		if ( ! $module->tab_form() ) {
+			$module->render_tab();
+			return;
+		}
 		?>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="hm_toolkit_save_settings">
@@ -306,7 +310,7 @@ final class Admin_Page {
 		check_admin_referer( 'hm_toolkit_save_' . $slug );
 
 		$module = Registry::get( $slug );
-		if ( null === $module || ! $module->has_tab() ) {
+		if ( null === $module || ! $module->has_tab() || ! $module->tab_form() ) {
 			wp_die( esc_html__( 'Onbekende module.', 'hashtagmedia-toolkit' ), '', array( 'response' => 400 ) );
 		}
 

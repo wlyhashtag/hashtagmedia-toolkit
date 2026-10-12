@@ -80,9 +80,115 @@ abstract class Module {
 	}
 
 	/**
-	 * Inhoud van het tabblad (binnen het formulier van de kern).
+	 * Inhoud van het tabblad (binnen het formulier van de kern, tenzij
+	 * tab_form() false is).
 	 */
 	public function render_tab(): void {}
+
+	/**
+	 * Zet de kern het tabblad in zijn formulier met een knop Opslaan?
+	 * Geef false terug als de module zelf formulieren op het tabblad zet.
+	 *
+	 * @return bool
+	 */
+	public function tab_form(): bool {
+		return true;
+	}
+
+	/**
+	 * Instellingen die per site verschillen of intern zijn. Ze gaan niet mee
+	 * bij exporteren en importeren.
+	 *
+	 * @return string[]
+	 */
+	public function site_settings(): array {
+		return array();
+	}
+
+	/**
+	 * Instellingen voor een exportbestand: alle bekende sleutels behalve de
+	 * sitegebonden.
+	 *
+	 * @return array
+	 */
+	public function export_settings(): array {
+		$skip = $this->site_settings();
+		$out  = array();
+		foreach ( $this->settings() as $key => $value ) {
+			if ( array_key_exists( $key, $this->defaults() ) && ! in_array( $key, $skip, true ) ) {
+				$out[ $key ] = $value;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Instellingen uit een importbestand saneren. Alleen bekende sleutels,
+	 * niet de sitegebonden, en elk in het type van de standaardwaarde.
+	 * Modules met strengere regels kunnen dit overschrijven.
+	 *
+	 * @param array $values Waarden uit het bestand.
+	 * @return array Gesaneerde waarden (alleen wat in het bestand stond).
+	 */
+	public function import_settings( array $values ): array {
+		$skip  = $this->site_settings();
+		$clean = array();
+		foreach ( $this->defaults() as $key => $default ) {
+			if ( in_array( $key, $skip, true ) || ! array_key_exists( $key, $values ) ) {
+				continue;
+			}
+			$clean[ $key ] = self::import_value( $default, $values[ $key ] );
+		}
+		return $clean;
+	}
+
+	/**
+	 * Eén geïmporteerde waarde in het type van de standaardwaarde.
+	 *
+	 * @param mixed $default_value Standaardwaarde.
+	 * @param mixed $value         Waarde uit het bestand.
+	 * @return mixed
+	 */
+	private static function import_value( $default_value, $value ) {
+		if ( is_bool( $default_value ) ) {
+			return rest_sanitize_boolean( is_scalar( $value ) ? $value : false );
+		}
+		if ( is_int( $default_value ) ) {
+			return is_numeric( $value ) ? (int) $value : $default_value;
+		}
+		if ( is_string( $default_value ) ) {
+			return is_scalar( $value ) ? sanitize_text_field( (string) $value ) : $default_value;
+		}
+		if ( is_array( $default_value ) ) {
+			return is_array( $value ) ? self::import_array( $value, 0 ) : $default_value;
+		}
+		return $default_value;
+	}
+
+	/**
+	 * Lijst uit een importbestand: alleen tekst, getallen en ja/nee, maximaal
+	 * drie niveaus diep.
+	 *
+	 * @param array $items Lijst.
+	 * @param int   $depth Huidige diepte.
+	 * @return array
+	 */
+	private static function import_array( array $items, int $depth ): array {
+		$clean = array();
+		foreach ( $items as $key => $item ) {
+			$key = is_int( $key ) ? $key : sanitize_text_field( (string) $key );
+			if ( is_array( $item ) ) {
+				if ( $depth < 2 ) {
+					$clean[ $key ] = self::import_array( $item, $depth + 1 );
+				}
+			} elseif ( is_bool( $item ) || is_int( $item ) ) {
+				$clean[ $key ] = $item;
+			} elseif ( is_scalar( $item ) ) {
+				$clean[ $key ] = sanitize_text_field( (string) $item );
+			}
+		}
+		return $clean;
+	}
 
 	/**
 	 * Saneert de invoer van het tabblad. Verplicht als has_tab() true is.

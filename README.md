@@ -55,6 +55,11 @@ De kern laadt bij elk verzoek alleen de modules die aanstaan. De modulemap wordt
    }
    ```
 
+   Optioneel:
+   - `tab_form()` → `false` als het tabblad eigen formulieren heeft (geen knop Opslaan van de kern).
+   - `site_settings()` → sleutels die per site verschillen of intern zijn; die gaan nooit mee bij export en import.
+   - `import_settings()` → strengere regels bij importeren. Standaard: alleen bekende sleutels, in het type van de standaardwaarde.
+
 4. `uninstall.php`: ruim alles op wat buiten de eigen instellingen valt, zoals rollen, rechten, post-meta en user-meta. De eigen instellingen ruimt de kern op.
 
 ## Afspraken
@@ -176,6 +181,14 @@ Knoppen naar de juiste plek in Complianz, Yoast, Gravity Forms, WP Rocket (ook "
 - Een knop verschijnt alleen als de plugin actief is.
 - **Alle adressen staan in `modules/snelkoppelingen/links.php`.** Wijzigt een plugin zijn adressen na een update, pas dan alleen dat bestand aan.
 - De optiepagina's van het thema worden vanzelf gevonden via ACF.
+
+## Module Export en import
+
+- **HashtagMedia-standaard**: `modules/export-import/standaard.json`, in één klik toe te passen op een nieuwe site. Bijwerken: zet een site goed, exporteer, en vervang dit bestand met de export (in een nieuwe versie van de toolkit).
+- **Exporteren**: welke modules aanstaan en hun instellingen, als JSON.
+- **Importeren**: zo'n bestand uploaden (maximaal 500 KB). Elke module saneert zijn eigen waarden; onbekende modules en sleutels worden overgeslagen.
+- **Gaat nooit mee**: wat per site verschilt (contactgegevens, bereikbaarheid, handleiding-link, beschermde pagina's) en interne waarden (rolversie). Die blijven op de site zoals ze zijn.
+- Alleen de toolkit; Yoast, WP Rocket, Complianz en Gravity Forms hebben hun eigen export.
 
 ## Module Opruimen: pluginprofielen
 

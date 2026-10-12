@@ -291,6 +291,20 @@ final class Module extends Base {
 	}
 
 	/**
+	 * Import: kwaliteit binnen dezelfde grenzen als het tabblad.
+	 *
+	 * @param array $values Waarden uit het bestand.
+	 * @return array
+	 */
+	public function import_settings( array $values ): array {
+		$clean = parent::import_settings( $values );
+		if ( isset( $clean['quality'] ) ) {
+			$clean['quality'] = max( 40, min( 100, (int) $clean['quality'] ) );
+		}
+		return $clean;
+	}
+
+	/**
 	 * Saneert het tabblad.
 	 *
 	 * @param array $input Invoer.

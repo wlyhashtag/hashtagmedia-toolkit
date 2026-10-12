@@ -39,6 +39,17 @@ final class Module extends Base {
 	}
 
 	/**
+	 * Pagina-ID's kloppen alleen op deze site: gaan niet mee bij exporteren en importeren.
+	 *
+	 * @return string[]
+	 */
+	public function site_settings(): array {
+		return array(
+			'protected_pages',
+		);
+	}
+
+	/**
 	 * Frontend, admin en REST.
 	 */
 	public function boot(): void {
@@ -224,6 +235,20 @@ final class Module extends Base {
 			<?php endforeach; ?>
 		</fieldset>
 		<?php
+	}
+
+	/**
+	 * Import: aantal revisies binnen dezelfde grenzen als het tabblad.
+	 *
+	 * @param array $values Waarden uit het bestand.
+	 * @return array
+	 */
+	public function import_settings( array $values ): array {
+		$clean = parent::import_settings( $values );
+		if ( isset( $clean['revisions'] ) ) {
+			$clean['revisions'] = max( 0, min( self::MAX_REVISIONS, absint( $clean['revisions'] ) ) );
+		}
+		return $clean;
 	}
 
 	/**

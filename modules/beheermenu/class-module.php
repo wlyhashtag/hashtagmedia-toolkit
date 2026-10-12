@@ -399,6 +399,29 @@ final class Module extends Base {
 	}
 
 	/**
+	 * Import: alleen lijsten met menu-slugs en paren [hoofdmenu, submenu].
+	 *
+	 * @param array $values Waarden uit het bestand.
+	 * @return array
+	 */
+	public function import_settings( array $values ): array {
+		$clean = array();
+		foreach ( array( 'order', 'hidden' ) as $key ) {
+			if ( array_key_exists( $key, $values ) ) {
+				$clean[ $key ] = self::clean_list( $values[ $key ] );
+			}
+		}
+		if ( array_key_exists( 'hidden_sub', $values ) ) {
+			$pairs = array();
+			foreach ( is_array( $values['hidden_sub'] ) ? $values['hidden_sub'] : array() as $pair ) {
+				$pairs[] = is_array( $pair ) ? (string) wp_json_encode( array_values( $pair ) ) : '';
+			}
+			$clean['hidden_sub'] = array_values( self::clean_pairs( $pairs ) );
+		}
+		return $clean;
+	}
+
+	/**
 	 * Saneert het tabblad. Verborgen = getoonde items minus aangezette.
 	 *
 	 * @param array $input Invoer.

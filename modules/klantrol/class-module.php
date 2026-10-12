@@ -148,6 +148,17 @@ final class Module extends Base {
 	}
 
 	/**
+	 * Interne stand van de rol: gaat niet mee bij exporteren en importeren.
+	 *
+	 * @return string[]
+	 */
+	public function site_settings(): array {
+		return array(
+			'role_version',
+		);
+	}
+
+	/**
 	 * Is deze gebruiker een klant (en geen HashtagMedia-beheerder)?
 	 *
 	 * @param \WP_User|null $user Gebruiker; standaard de huidige.
