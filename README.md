@@ -72,7 +72,7 @@ De kern laadt bij elk verzoek alleen de modules die aanstaan. De modulemap wordt
 | Hook | Soort | Waarvoor |
 | --- | --- | --- |
 | `hm_toolkit_modules_loaded` | action | Alle actieve modules zijn geladen. |
-| `hm_toolkit_company_name` | filter | Bedrijfsnaam van de klant (standaard de sitenaam). Bedrijfsgegevens vult deze later. |
+| `hm_toolkit_company_name` | filter | Bedrijfsnaam van de klant (standaard de sitenaam). Het thema vult deze vanuit zijn optiepagina. |
 | `hm_toolkit_dashboard_actions` | filter | Snelle acties op het dashboard: `label`, `url`, `icon` (dashicon). |
 | `hm_toolkit_environment_type` | filter | Omgevingstype (local, development, staging, production). |
 

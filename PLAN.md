@@ -41,7 +41,7 @@ De plugin vervangt alleen ASE; Elementor Pro verdwijnt door de overstap naar cus
 
 ## Modules
 
-Twaalf modules, waarvan negen groen; alleen de Gravity Forms-styling, de focuspunt-kiezer en de frontend-editor vragen extra bouw- en testwerk.
+Elf modules, waarvan acht groen; alleen de Gravity Forms-styling, de focuspunt-kiezer en de frontend-editor vragen extra bouw- en testwerk.
 
 | Module | Inhoud | Haalbaarheid | Fase |
 | --- | --- | --- | --- |
@@ -51,7 +51,6 @@ Twaalf modules, waarvan negen groen; alleen de Gravity Forms-styling, de focuspu
 | Content | Dupliceren als concept, inclusief ACF-velden, Yoast-gegevens, uitgelichte afbeelding en categorieën. SVG-upload met sanitizer, alleen voor beheerders. Gutenberg, blokwidgets en blok-CSS uit. Revisies beperken. Belangrijke pagina's beschermen tegen verwijderen. | Groen | 1 |
 | Basisbeveiliging | XML-RPC uit, thema- en plugin-editor uit, WP-versie verbergen. De rest doet Wordfence. | Groen | 1 |
 | Klantrol | Eén rol Klant: content, menu's, ACF-optiepagina's, Yoast per pagina en alle formulieren en inzendingen. Kan collega's toevoegen met de Klant-rol; HashtagMedia-beheerders zijn voor de klant onzichtbaar en niet te bewerken. Geen plugins, thema's, instellingen of ongefilterde HTML. HashtagMedia blijft de enige beheerder. | Groen | 1 |
-| Bedrijfsgegevens | ACF-optiepagina met adres, telefoon en socials, plus helpers en shortcodes voor het thema. | Groen | 1 |
 | Instellingen export/import | Standaardconfiguratie als JSON, in één klik op een nieuwe site. Updates via de eigen GitHub-repo. | Groen | 1 |
 | Snelkoppelingen | Pagina "Instellingen" voor beheerders met knoppen naar de juiste plek in andere plugins: Complianz-integraties (GTM), Yoast-webmastertools, Gravity Forms, WP Rocket, Wordfence, Duplicator en de ACF-optiepagina. Een knop verschijnt alleen als de plugin actief is; alle links staan in één bestand. | Groen | 1 |
 | Afbeeldingen | JPEG en PNG worden bij uploaden WebP, te grote foto's verkleind tot maximaal 2560 px, kwaliteit instelbaar (standaard 82%). Proportionele formaten zonder bijsnijden; het thema laat afbeeldingen passend vullen rond een focuspunt dat per afbeelding gekozen wordt in de mediabibliotheek en de frontend-editor. Helper `hm_image()` zet formaten, focuspunt, lazy loading en afmetingen. Controleert of de server WebP ondersteunt; origineel blijft bewaard. | Groen; focuspunt-kiezer in de mediabibliotheek oranje | 1 |
@@ -96,6 +95,7 @@ Deze ideeën vallen af omdat een bestaande plugin het al doet, of omdat het risi
 | Icon libraries en Google Fonts-optie | Horen in het thema: alleen gebruikte iconen als SVG, lettertypen lokaal |
 | Kiesveld voor iconen | Past niet bij een vaste layout; later als losse module als klanten erom vragen |
 | Code invoegen in head en body | GTM laden via Complianz, overige pixels via GTM, verificatiecodes in Yoast |
+| Bedrijfsgegevens-optiepagina | Hoort in de optiepagina van het thema, naast de thema-specifieke velden; zo heeft de klant één plek |
 
 ## Afspraken met de thema's
 
@@ -103,7 +103,7 @@ Elk thema dat Claude Code bouwt, volgt vaste afspraken zodat het naadloos met de
 
 - **Bewerkbare velden:** elk ACF-veld via `hm_field()`, zodat de frontend-editor werkt.
 - **Formulieren:** altijd via `hm_form()` en het ACF-veld "Kies formulier"; GF-styling alleen via de CSS-variabelen.
-- **Bedrijfsgegevens:** altijd uit de optiepagina, nooit hard in het thema.
+- **Bedrijfsgegevens:** in de optiepagina van het thema (naast logo, knoppen e.d.), nooit hard in de code. De bedrijfsnaam geeft het thema door aan het dashboard via het filter `hm_toolkit_company_name`.
 - **Iconen:** alleen de gebruikte iconen als SVG-bestanden in het thema, ingeladen via `hm_icon()` uit de plugin. Geen complete icon libraries.
 - **Afbeeldingen:** altijd via `hm_image()`, zodat WebP, focuspunt en lazy loading vanzelf goed gaan.
 - **Lettertypen:** lokaal in het thema (woff2), nooit van de servers van Google; sneller en geen AVG-risico.
@@ -126,7 +126,7 @@ Het grootste risico is dat één plugin op alle klantsites draait; een bug zit d
 
 Drie fasen; na fase 1 is ASE volledig vervangen.
 
-1. **Fase 1, de basis:** opruimen, huisstijl en dashboard, beheermenu, content, basisbeveiliging, klantrol, bedrijfsgegevens, afbeeldingen, snelkoppelingen, instellingen export/import en de GitHub-updater. Tegelijk de thema-afspraken vastleggen in de skill.
+1. **Fase 1, de basis:** opruimen, huisstijl en dashboard, beheermenu, content, basisbeveiliging, klantrol, afbeeldingen, snelkoppelingen, instellingen export/import en de GitHub-updater. Tegelijk de thema-afspraken vastleggen in de skill.
 2. **Fase 2, Gravity Forms:** basisstyling, koppeling met het thema en het testformulier.
 3. **Fase 3, frontend-editor:** eerst inline bewerken van teksten, afbeeldingen en knoppen, daarna het zijpaneel voor complexe velden en het logboek. Tot die tijd bewerken klanten ACF-velden in de admin.
 
@@ -137,4 +137,5 @@ Drie fasen; na fase 1 is ASE volledig vervangen.
 - Supportknop: melding per e-mail naar HashtagMedia.
 - Omgevingslabel staging/live: ja.
 - Naam en prefix: HashtagMedia Toolkit, `hm_`.
+- Bedrijfsgegevens: in het thema, niet in de plugin (besloten 12 oktober 2026).
 - Code invoegen in head en body: niet bouwen. GTM laden via Complianz, overige pixels via GTM, verificatiecodes in Yoast.
