@@ -23,6 +23,8 @@ return array(
 		'.cmplz-upgrade-to-premium',
 		'.cmplz-grid-item-footer-upsell-bar',
 		'[class*="cmplz"][class*="upsell"]',
+		'.cmplz-wrapper a[href*="complianz.io/pricing"]',
+		'.cmplz-task-element:has(.cmplz-premium)',
 	),
 	'hooks'    => null,
 );
