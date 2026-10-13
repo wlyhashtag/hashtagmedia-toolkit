@@ -84,6 +84,7 @@ De kern laadt bij elk verzoek alleen de modules die aanstaan. De modulemap wordt
 | `hm_toolkit_image_attr` | filter | Attributen van `hm_image()` aanpassen. |
 | `hm_toolkit_image_focus` | filter | Focuspunt als CSS-waarde (module Afbeeldingen vult dit). |
 | `hm_toolkit_shortcuts` | filter | Groepen snelkoppelingen, in de vorm van `modules/snelkoppelingen/links.php`. |
+| `hm_toolkit_form_button_class` | filter | Knopklasse van de verzendknop (standaard `knop`). |
 
 ## Omgevingslabel
 
@@ -190,6 +191,14 @@ Knoppen naar de juiste plek in Complianz, Yoast, Gravity Forms, WP Rocket (ook "
 - **Importeren**: zo'n bestand uploaden (maximaal 500 KB). Elke module saneert zijn eigen waarden; onbekende modules en sleutels worden overgeslagen.
 - **Gaat nooit mee**: wat per site verschilt (contactgegevens, bereikbaarheid, handleiding-link, beschermde pagina's) en interne waarden (rolversie). Die blijven op de site zoals ze zijn.
 - Alleen de toolkit; Yoast, WP Rocket, Complianz en Gravity Forms hebben hun eigen export.
+
+## Module Formulieren (Gravity Forms)
+
+- **Honeypot altijd aan** bij elk formulier (`gform_form_post_get_meta`), ook als hij in de formulierinstellingen uitstaat. Een bot die het veld invult, komt bij Spam.
+- **Verzendknop** wordt `<button type="submit">` met de knopklasse van het thema erbij. Standaard `knop`; een thema met een andere naam gebruikt het filter `hm_toolkit_form_button_class`. Een afbeeldingsknop blijft ongemoeid.
+- **ACF-keuzeveld**: een veld van het type *Select* met de naam `formulier` krijgt vanzelf alle actieve formulieren als keuze (`acf/prepare_field`). Het thema toont het met `hm_form( get_field( 'formulier' ) )`.
+- **Testformulier**: tabblad Formulieren, knop "Testformulier aanmaken" (alleen beheerders). Alle veldtypes; bestaat het al, dan opent het.
+- **Geen eigen CSS.** Gravity Forms (Orbital) doet de opmaak; het thema geeft zijn kleuren door met `gform_default_styles` (zie `THEMA-AFSPRAKEN.md`). GF rekent zelf de varianten uit (donkerder, lichter, contrast, focusrand).
 
 ## Module Updates
 

@@ -54,7 +54,7 @@ Elf modules, waarvan acht groen; alleen de Gravity Forms-styling, de focuspunt-k
 | Instellingen export/import | Standaardconfiguratie als JSON, in één klik op een nieuwe site. Updates via de eigen GitHub-repo. | Groen | 1 |
 | Snelkoppelingen | Tabblad en dashboardblok voor beheerders met knoppen naar de juiste plek in andere plugins: Complianz-integraties (GTM), Yoast-webmastertools, Gravity Forms, WP Rocket, Wordfence, Duplicator, FluentSMTP en de ACF-optiepagina. Een knop verschijnt alleen als de plugin actief is; alle links staan in één bestand. | Groen | 1 |
 | Afbeeldingen | JPEG en PNG worden bij uploaden WebP, te grote foto's verkleind tot maximaal 2560 px, kwaliteit instelbaar (standaard 82%). Proportionele formaten zonder bijsnijden; het thema laat afbeeldingen passend vullen rond een focuspunt dat per afbeelding gekozen wordt in de mediabibliotheek en de frontend-editor. Helper `hm_image()` zet formaten, focuspunt, lazy loading en afmetingen. Controleert of de server WebP ondersteunt; origineel blijft bewaard. | Groen; focuspunt-kiezer in de mediabibliotheek oranje | 1 |
-| Gravity Forms | Complete basisstyling voor alle veldtypes en toestanden, gestuurd met CSS-variabelen. Verzendknop als button, honeypot standaard aan, ACF-veld "Kies formulier", testformulier met alle veldtypes. Add-ons aanvullen wanneer ze voor het eerst gebruikt worden. | Groen voor koppeling; styling vraagt grondig testen | 2 |
+| Formulieren (Gravity Forms) | Opmaak door GF (Orbital), kleuren uit het thema via `gform_default_styles`. Verzendknop als button, honeypot altijd aan, ACF-veld "formulier", `hm_form()`, testformulier met alle veldtypes. Add-ons aanvullen wanneer ze voor het eerst gebruikt worden. | Groen; gebouwd in 0.11.0 | 2 |
 | Frontend-editor | Teksten en afbeeldingen in ACF-velden op de pagina bewerken; layout en secties blijven vast. Inline voor tekst en afbeeldingen, en voor knoppen een klein venster om knoptekst, link (kiezen uit pagina's van de site) en nieuw tabblad aan te passen; de opmaak blijft vast. Zijpaneel via ACF-formulieren voor repeaters en flexibele content. Logboek met oude en nieuwe waarde, cache van de pagina legen via WP Rocket. Laadt alleen voor ingelogde gebruikers met rechten. | Oranje; grootste module | 3 |
 
 ## Vormgeving
@@ -102,7 +102,7 @@ Deze ideeën vallen af omdat een bestaande plugin het al doet, of omdat het risi
 Elk thema dat Claude Code bouwt, volgt vaste afspraken zodat het naadloos met de plugin samenwerkt. Deze komen in de skill *wp-thema-uit-ontwerp*.
 
 - **Bewerkbare velden:** elk ACF-veld via `hm_field()`, zodat de frontend-editor werkt.
-- **Formulieren:** altijd via `hm_form()` en het ACF-veld "Kies formulier"; GF-styling alleen via de CSS-variabelen.
+- **Formulieren:** altijd via `hm_form()` en het ACF-veld `formulier`; kleuren via `gform_default_styles`, geen eigen formulier-CSS.
 - **Bedrijfsgegevens:** in de optiepagina van het thema (naast logo, knoppen e.d.), nooit hard in de code. De bedrijfsnaam geeft het thema door aan het dashboard via het filter `hm_toolkit_company_name`.
 - **Iconen:** alleen de gebruikte iconen als SVG-bestanden in het thema, ingeladen via `hm_icon()` uit de plugin. Geen complete icon libraries.
 - **Afbeeldingen:** altijd via `hm_image()`, zodat WebP, focuspunt en lazy loading vanzelf goed gaan.
@@ -139,3 +139,4 @@ Drie fasen; na fase 1 is ASE volledig vervangen.
 - Naam en prefix: HashtagMedia Toolkit, `hm_`.
 - Bedrijfsgegevens: in het thema, niet in de plugin (besloten 12 oktober 2026).
 - Code invoegen in head en body: niet bouwen. GTM laden via Complianz, overige pixels via GTM, verificatiecodes in Yoast.
+- Gravity Forms: geen eigen formulier-CSS in de toolkit; het thema geeft kleuren door met `gform_default_styles`, zodat GF de varianten (focus, hover, contrast) zelf goed uitrekent. Honeypot altijd aan, knopklasse standaard `knop` met filter, testformulier via een knop (besloten 13 oktober 2026).

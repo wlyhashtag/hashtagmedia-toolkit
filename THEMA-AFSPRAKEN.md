@@ -22,7 +22,7 @@ De skill *wp-thema-uit-ontwerp* volgt deze afspraken. Verandert hier iets, werk 
 | Bedrijfsnaam in het dashboard | Toont hem | Geeft hem door via `hm_toolkit_company_name` |
 | Opmaak, secties, ACF-velden voor inhoud | – | ✔ |
 | Emoji-scripts uit, fonts, eigen JS en CSS | – | ✔ |
-| Gravity Forms | Fase 2: basisstyling via CSS-variabelen, knop, honeypot, `hm_form()` | Tot fase 2 zelf; daarna alleen de CSS-variabelen |
+| Gravity Forms | Honeypot altijd aan, verzendknop als `<button>` met knopklasse, ACF-keuzeveld `formulier`, `hm_form()`, testformulier (module Formulieren) | Kleuren via `gform_default_styles`; knopklasse via `hm_toolkit_form_button_class` als die niet `knop` heet |
 | Frontend-editor | Fase 3: `hm_field()` | Tot fase 3: gewoon `get_field()` |
 
 ## Toolkit-functies voor het thema
@@ -39,6 +39,32 @@ hm_image( $id_of_acf_afbeelding, array(
 ) );
 $html = hm_get_image( $id, $args ); // geeft de HTML terug
 $pos  = hm_image_focus( $id );      // '30% 65%' voor background-position
+```
+
+Formulieren (ACF-veld van het type *Select* met de naam `formulier`; de toolkit vult de keuzes):
+
+```php
+hm_form( get_field( 'formulier' ) ); // zonder titel en beschrijving, met AJAX
+```
+
+Kleuren van Gravity Forms (in het thema, met de waarden van de design tokens; GF rekent de varianten zelf uit):
+
+```php
+add_filter( 'gform_default_styles', function () {
+	return array(
+		'theme'                        => 'orbital',
+		'inputPrimaryColor'            => '#1a5f4a', // focus, vinkjes, keuzes
+		'inputBorderColor'             => '#c9c9c9',
+		'inputColor'                   => '#1d1d1b', // tekst in velden
+		'inputBackgroundColor'         => '#ffffff',
+		'inputBorderRadius'            => 8,         // px
+		'labelColor'                   => '#1d1d1b',
+		'buttonPrimaryBackgroundColor' => '#1a5f4a',
+		'buttonPrimaryColor'           => '#ffffff',
+	);
+} );
+// Heet de knopklasse van het thema niet 'knop'?
+add_filter( 'hm_toolkit_form_button_class', fn() => 'btn btn--primair' );
 ```
 
 Bedrijfsnaam doorgeven aan het dashboard (in het thema):

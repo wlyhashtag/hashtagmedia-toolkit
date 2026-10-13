@@ -11,6 +11,7 @@
         "content": true,
         "huisstijl": true,
         "export-import": true,
+        "formulieren": true,
         "klantrol": true,
         "opruimen": true,
         "snelkoppelingen": true

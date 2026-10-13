@@ -123,6 +123,21 @@ if ( ! function_exists( 'hm_image' ) ) {
 	}
 }
 
+if ( ! function_exists( 'hm_form' ) ) {
+	/**
+	 * Toont een Gravity Forms-formulier zonder titel en beschrijving, met AJAX.
+	 * Doet niets als Gravity Forms niet actief is of het formulier niet bestaat.
+	 *
+	 * @param mixed $form Formulier-ID, bijv. de waarde van het ACF-veld 'formulier'.
+	 */
+	function hm_form( $form ): void {
+		$id = absint( is_array( $form ) ? ( $form['id'] ?? 0 ) : $form );
+		if ( $id && function_exists( 'gravity_form' ) && GFAPI::form_id_exists( $id ) ) {
+			gravity_form( $id, false, false, false, null, true );
+		}
+	}
+}
+
 if ( ! function_exists( 'hm_image_focus' ) ) {
 	/**
 	 * Focuspunt als CSS-waarde voor object-position of background-position.
