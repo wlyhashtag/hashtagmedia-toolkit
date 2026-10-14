@@ -205,7 +205,7 @@ Knoppen naar de juiste plek in Complianz, Yoast, Gravity Forms, WP Rocket (ook "
 
 Teksten, afbeeldingen en knoppen op de pagina zelf bewerken. Werkt alleen met velden die het thema toont met `hm_field()` (zie `THEMA-AFSPRAKEN.md`). Ontwerp: overlay over de site, neutraal in de kleuren van WordPress.
 
-- **Starten**: knop "Pagina bewerken" in de adminbalk, alleen als er op de pagina iets is dat de gebruiker mag bewerken, en niet op de telefoon (smaller dan 783 px).
+- **Starten**: blauwe knop "Visueel bewerken" (penseel) in de adminbalk, zodat hij niet lijkt op "Pagina bewerken" van WordPress, alleen als er op de pagina iets is dat de gebruiker mag bewerken, en niet op de telefoon (smaller dan 783 px).
 - **Bewerken**: tekst, tekstvak, e-mail en URL direct in de pagina; teksteditor met een kleine werkbalk (vet, cursief, link, lijstjes); afbeelding via het mediavenster (Vervangen, Focuspunt); link als knop via een venster met knoptekst, link (pagina zoeken of adres plakken) en nieuw tabblad. Geplakte tekst komt altijd zonder opmaak binnen.
 - **Optievelden** (ACF-optiepagina): geel label "Elke pagina" en een waarschuwing dat de wijziging overal zichtbaar wordt.
 - **Publiceren**: alle wijzigingen in één verzoek naar `POST /wp-json/hm-toolkit/v1/velden`. Per veld opnieuw gecontroleerd: bestaat het, staat het op het hoogste niveau van een veldgroep, mag de gebruiker het bericht bewerken (`edit_post`) of de optiepagina openen (het recht van die optiepagina), en is de waarde geldig. Eén fout = niets opgeslagen. Saneren per type (`sanitize_text_field`, `wp_kses_post`, `esc_url_raw`, alleen bestaande afbeeldingen). Daarna de cache van WP Rocket legen: de pagina, of de hele site bij een optieveld.

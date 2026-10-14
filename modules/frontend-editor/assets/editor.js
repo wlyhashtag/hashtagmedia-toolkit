@@ -41,7 +41,7 @@
 	// Alleen vaste HTML; alles wat van de site komt gaat via textContent of value.
 	var TEMPLATE =
 		'<link rel="stylesheet" href="">' +
-		'<div class="layer card bar" role="toolbar" aria-label="Pagina bewerken">' + ICON.pencil +
+		'<div class="layer card bar" role="toolbar" aria-label="Visueel bewerken">' + ICON.pencil +
 			'<span class="title"></span>' +
 			'<span class="status" aria-live="polite"><span class="dot"></span><span class="status-text"></span></span>' +
 			'<button type="button" class="b" data-act="cancel"></button>' +

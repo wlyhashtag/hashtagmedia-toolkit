@@ -129,7 +129,7 @@ final class Module extends Base {
 	}
 
 	/**
-	 * Knop "Pagina bewerken" in de adminbalk, alleen als er iets te bewerken is.
+	 * Knop "Visueel bewerken" in de adminbalk, alleen als er iets te bewerken is.
 	 *
 	 * @param \WP_Admin_Bar $admin_bar Adminbalk.
 	 */
@@ -140,7 +140,7 @@ final class Module extends Base {
 		$admin_bar->add_node(
 			array(
 				'id'    => 'hm-toolkit-bewerken',
-				'title' => '<span class="ab-icon dashicons dashicons-edit" aria-hidden="true"></span>' . esc_html__( 'Pagina bewerken', 'hashtagmedia-toolkit' ),
+				'title' => '<span class="ab-icon dashicons dashicons-admin-customizer" aria-hidden="true"></span>' . esc_html__( 'Visueel bewerken', 'hashtagmedia-toolkit' ),
 				'href'  => '#',
 			)
 		);

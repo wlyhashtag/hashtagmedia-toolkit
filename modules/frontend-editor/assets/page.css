@@ -11,8 +11,21 @@
 	}
 }
 
-#wp-admin-bar-hm-toolkit-bewerken > .ab-item .ab-icon::before {
+/* Blauw, zodat hij opvalt en niet lijkt op "Pagina bewerken" van WordPress. */
+#wpadminbar #wp-admin-bar-hm-toolkit-bewerken > .ab-item {
+	background: #2271b1;
+	color: #fff;
+}
+
+#wpadminbar #wp-admin-bar-hm-toolkit-bewerken > .ab-item:hover,
+#wpadminbar #wp-admin-bar-hm-toolkit-bewerken > .ab-item:focus {
+	background: #135e96;
+	color: #fff;
+}
+
+#wpadminbar #wp-admin-bar-hm-toolkit-bewerken .ab-icon::before {
 	top: 2px;
+	color: #fff;
 }
 
 /* Bewerkmodus: adminbalk weg, de site op volle hoogte. */
