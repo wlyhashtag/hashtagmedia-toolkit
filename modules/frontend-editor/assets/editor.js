@@ -118,7 +118,16 @@
 		host.id = 'hm-toolkit-editor';
 		shadow = host.attachShadow( { mode: 'open' } );
 		shadow.innerHTML = TEMPLATE;
-		shadow.querySelector( 'link' ).href = cfg.ui;
+		var sheet = shadow.querySelector( 'link' );
+		// Pas tonen als de opmaak er is, anders zie je even kale knoppen.
+		host.style.visibility = 'hidden';
+		sheet.addEventListener( 'load', function () {
+			host.style.visibility = '';
+		} );
+		sheet.addEventListener( 'error', function () {
+			host.style.visibility = '';
+		} );
+		sheet.href = cfg.ui;
 		document.body.appendChild( host );
 
 		[ 'bar', 'tools', 'chip', 'warn', 'imgtools', 'pop', 'toast', 'linkform', 'results', 'panel', 'plist', 'ptitle', 'psub', 'padd', 'menu' ].forEach( function ( name ) {
@@ -674,10 +683,8 @@
 		var val = listValue( list );
 		if ( JSON.stringify( val ) === list.original ) {
 			changes.delete( k );
-			list.el.classList.remove( 'hm-te-changed' );
 		} else {
 			changes.set( k, { post: list.desc.post, key: list.desc.key, value: val } );
-			list.el.classList.add( 'hm-te-changed' );
 		}
 		render();
 	}
@@ -714,7 +721,7 @@
 		if ( row ) {
 			list.expanded = row;
 		} else if ( ! list.expanded || list.rows.indexOf( list.expanded ) < 0 ) {
-			list.expanded = list.desc.flex || 1 === list.rows.length ? list.rows[ 0 ] || null : null;
+			list.expanded = ! list.desc.rijen || 1 === list.rows.length ? list.rows[ 0 ] || null : null;
 		}
 		$.panel.hidden = false;
 		shadow.host.classList.add( 'panel-on' );
@@ -751,7 +758,7 @@
 		var desc = list.desc;
 		var n = list.rows.length;
 		var sub = n + ( 1 === n ? ' onderdeel' : ' onderdelen' );
-		if ( ! desc.flex && n > 1 ) {
+		if ( desc.rijen && n > 1 ) {
 			sub += ' · sleep om te ordenen';
 		}
 		if ( 'option' === desc.post ) {
@@ -760,7 +767,7 @@
 		$.panel.setAttribute( 'aria-label', desc.label + ' bewerken' );
 		$.ptitle.textContent = desc.label;
 		$.psub.textContent = sub;
-		$.padd.hidden = desc.flex;
+		$.padd.hidden = ! desc.rijen;
 		$.padd.disabled = desc.max > 0 && n >= desc.max;
 		$.padd.title = $.padd.disabled ? 'Maximaal ' + desc.max + ' onderdelen' : '';
 
@@ -792,6 +799,9 @@
 		head.appendChild( main );
 		card.appendChild( head );
 
+		thumb.hidden = ! layoutFields( list, row ).some( function ( f ) {
+			return 'image' === f.type;
+		} );
 		var fill = function () {
 			var t = rowTexts( list, row, list.rows.indexOf( row ) );
 			title.textContent = t.title;
@@ -818,7 +828,7 @@
 			}
 		} );
 
-		if ( ! list.desc.flex ) {
+		if ( list.desc.rijen ) {
 			var more = h( 'button', 'ico' );
 			more.type = 'button';
 			more.setAttribute( 'aria-label', 'Meer acties' );
@@ -840,7 +850,7 @@
 				renderPanel();
 			} );
 			head.appendChild( chevron );
-		} else if ( ! list.desc.flex ) {
+		} else if ( list.desc.rijen ) {
 			head.appendChild( dragHandle( list, card, row ) );
 		}
 
@@ -1093,7 +1103,7 @@
 	}
 
 	function addRow( list ) {
-		if ( list.desc.flex || ( list.desc.max > 0 && list.rows.length >= list.desc.max ) ) {
+		if ( ! list.desc.rijen || ( list.desc.max > 0 && list.rows.length >= list.desc.max ) ) {
 			return;
 		}
 		var row = { id: ++rowId, from: null, layout: '', values: {}, images: {}, touched: {}, el: null };

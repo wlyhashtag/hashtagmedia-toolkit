@@ -50,7 +50,8 @@ final class Module extends Base {
 	private bool $has_fields = false;
 
 	/**
-	 * Lijsten op deze pagina die de gebruiker mag bewerken: veldsleutel => array( veld, doel ).
+	 * Lijsten op deze pagina die de gebruiker mag bewerken: veldsleutel => array( veld, doel, rijen ).
+	 * Rijen = toevoegen, dupliceren, verplaatsen en verwijderen mag (alleen herhaler, alleen als het thema dat aanzet).
 	 *
 	 * @var array
 	 */
@@ -61,7 +62,7 @@ final class Module extends Base {
 	 */
 	public function boot(): void {
 		add_filter( 'hm_toolkit_field_attr', array( $this, 'field_attr' ), 10, 4 );
-		add_filter( 'hm_toolkit_list_attr', array( $this, 'list_attr' ), 10, 3 );
+		add_filter( 'hm_toolkit_list_attr', array( $this, 'list_attr' ), 10, 4 );
 		add_filter( 'hm_toolkit_row_attr', array( $this, 'row_attr' ), 10, 2 );
 		add_action( 'rest_api_init', array( $this, 'register_route' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_node' ), 90 );
@@ -119,9 +120,10 @@ final class Module extends Base {
 	 * @param array      $attr    Attributen.
 	 * @param array      $field   ACF-veld.
 	 * @param int|string $post_id Bericht-ID, 'option' of false.
+	 * @param array      $args    Argumenten van hm_list_attr().
 	 * @return array
 	 */
-	public function list_attr( $attr, $field, $post_id ) {
+	public function list_attr( $attr, $field, $post_id, $args = array() ) {
 		if ( is_admin() || ! is_user_logged_in() || ! is_array( $field ) || empty( $field['key'] ) || ! in_array( $field['type'] ?? '', self::LISTS, true )
 			|| ! function_exists( 'acf_get_field_group' ) || ! acf_get_field_group( $field['parent'] ?? 0 ) ) {
 			return $attr;
@@ -133,7 +135,7 @@ final class Module extends Base {
 		}
 
 		$this->has_fields             = true;
-		$this->lists[ $field['key'] ] = array( $field, $target );
+		$this->lists[ $field['key'] ] = array( $field, $target, 'repeater' === $field['type'] && ! empty( $args['rijen'] ) );
 		return array_merge(
 			(array) $attr,
 			array(
@@ -167,7 +169,7 @@ final class Module extends Base {
 	 */
 	private function lists_data(): array {
 		$out = array();
-		foreach ( $this->lists as $key => list( $field, $target ) ) {
+		foreach ( $this->lists as $key => list( $field, $target, $structure ) ) {
 			$layouts = array();
 			foreach ( self::layouts( $field ) as $name => $layout ) {
 				$layouts[ $name ] = array(
@@ -227,6 +229,7 @@ final class Module extends Base {
 				'post'    => (string) $target,
 				'label'   => (string) ( $field['label'] ?? '' ),
 				'flex'    => 'flexible_content' === $field['type'],
+				'rijen'   => $structure,
 				'min'     => (int) ( $field['min'] ?? 0 ),
 				'max'     => (int) ( $field['max'] ?? 0 ),
 				'layouts' => (object) $layouts,

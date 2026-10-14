@@ -68,9 +68,11 @@ Lijsten (herhaler en flexibele inhoud) bewerkbaar maken: markeer het element ron
 </div>
 ```
 
+- **Standaard wijzigt de klant alleen de inhoud** van bestaande rijen; hij voegt niets toe en verplaatst of verwijdert niets. Zet `'rijen' => true` alleen bij een herhaler waarvan de opmaak elk aantal rijen aankan, zoals een FAQ-accordeon of een lijst socials: `hm_list_attr( 'faq', array( 'rijen' => true ) )`. Kaarten in een vast raster horen daar niet bij.
+- Een opsomming in lopende tekst is geen herhaler: gebruik een teksteditor-veld, daarin maakt de klant zelf lijstjes met de werkbalk.
 - `hm_list_attr( $naam, array( 'post_id' => 'option' ) )` voor een lijst op de optiepagina. Zonder `hm_list_attr()` blijft de lijst gewoon werken, maar is hij niet bewerkbaar op de pagina.
 - De rijen horen vaste broers van elkaar te zijn (zelfde ouder) en `hm_row_attr()` hoort op het element van de rij zelf; dan werken verplaatsen en dupliceren ook live. Een lijst zonder rijen krijgt in de bewerkmodus een minimale hoogte van 48 px, zodat hij aan te klikken is.
-- Eén niveau: een lijst in een lijst krijgt geen paneel. Flexibele inhoud: de klant bewerkt alleen de inhoud van bestaande secties, niet de volgorde of het aantal.
+- Eén niveau: een lijst in een lijst krijgt geen paneel. Flexibele inhoud: altijd alleen de inhoud van bestaande secties, ook met `'rijen' => true`.
 - Toon subvelden van andere types (keuzelijst, getal) met `get_sub_field()`; de editor laat ze bij het opslaan ongemoeid.
 - Andere veldtypes (keuzes, getallen, relaties): gewoon `get_field()`.
 - Optiepagina's met de standaard `post_id` (`options`) werken; een eigen `post_id` niet.

@@ -282,8 +282,13 @@ if ( ! function_exists( 'hm_list_attr' ) ) {
 	 * de frontend-editor er een zijpaneel voor kan openen. Wie niet mag
 	 * bewerken krijgt niets. Gebruik: <div <?php hm_list_attr( 'behandelingen' ); ?>>
 	 *
+	 * Standaard wijzigt de klant alleen de inhoud van bestaande rijen. Met
+	 * 'rijen' => true mag hij bij een herhaler ook rijen toevoegen, dupliceren,
+	 * verplaatsen en verwijderen (bijv. een FAQ); alleen als de opmaak elk
+	 * aantal rijen aankan.
+	 *
 	 * @param string $name Veldnaam van de herhaler of flexibele inhoud.
-	 * @param array  $args Argumenten: post_id (bericht-ID of 'option').
+	 * @param array  $args Argumenten: post_id (bericht-ID of 'option'), rijen (bool).
 	 */
 	function hm_list_attr( string $name, array $args = array() ): void {
 		$post_id = $args['post_id'] ?? false;
@@ -298,8 +303,9 @@ if ( ! function_exists( 'hm_list_attr' ) ) {
 			 * @param array      $attr    Attributen.
 			 * @param array      $field   ACF-veld (herhaler of flexibele inhoud).
 			 * @param int|string $post_id Bericht-ID, 'option' of false (huidige).
+			 * @param array      $args    Argumenten van hm_list_attr().
 			 */
-			echo hm_toolkit_attr_string( (array) apply_filters( 'hm_toolkit_list_attr', array(), $field, $post_id ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hm_toolkit_attr_string() escapet.
+			echo hm_toolkit_attr_string( (array) apply_filters( 'hm_toolkit_list_attr', array(), $field, $post_id, $args ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hm_toolkit_attr_string() escapet.
 		}
 	}
 }
