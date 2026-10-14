@@ -1,5 +1,6 @@
 /*
  * Frontend-editor: alleen wat op de pagina zelf moet (randen om velden).
+ * Kleuren uit de design tokens van WordPress (--wpds-*), met terugval.
  * De balk, werkbalken en vensters staan in een Shadow DOM met ui.css, zodat
  * het thema ze niet kan verstoren.
  */
@@ -13,13 +14,13 @@
 
 /* Blauw, zodat hij opvalt en niet lijkt op "Pagina bewerken" van WordPress. */
 #wpadminbar #wp-admin-bar-hm-toolkit-bewerken > .ab-item {
-	background: #2271b1;
+	background: var(--wpds-color-background-interactive-brand-strong, #3858e9);
 	color: #fff;
 }
 
 #wpadminbar #wp-admin-bar-hm-toolkit-bewerken > .ab-item:hover,
 #wpadminbar #wp-admin-bar-hm-toolkit-bewerken > .ab-item:focus {
-	background: #135e96;
+	background: var(--wpds-color-background-interactive-brand-strong-active, #2e49d9);
 	color: #fff;
 }
 
@@ -52,17 +53,17 @@ html.hm-te-on [data-hm-type="link"] {
 
 html.hm-te-on [data-hm-field]:hover,
 html.hm-te-on [data-hm-field]:focus {
-	outline: 2px solid #2271b1;
+	outline: 2px solid var(--wpds-color-stroke-focus, #3858e9);
 	outline-offset: 4px;
 }
 
 html.hm-te-on [data-hm-post="option"]:hover,
 html.hm-te-on [data-hm-post="option"]:focus {
-	outline-color: #f0c33c;
+	outline-color: var(--wpds-color-stroke-surface-warning, #e1bc7c);
 }
 
 html.hm-te-on [data-hm-field].hm-te-changed {
-	outline: 2px dashed #dba617;
+	outline: 2px dashed var(--wpds-color-stroke-surface-warning-strong, #926300);
 }
 
 html.hm-te-on [data-hm-field]:focus {

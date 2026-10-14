@@ -155,7 +155,9 @@ final class Module extends Base {
 		}
 
 		wp_enqueue_media();
-		wp_enqueue_style( 'hm-toolkit-editor', $this->url( 'assets/page.css' ), array( 'dashicons' ), HM_TOOLKIT_VERSION );
+		// De design tokens van WordPress 7 (--wpds-*), zodat de editor de kleuren van WordPress volgt.
+		$deps = wp_style_is( 'wp-theme', 'registered' ) ? array( 'dashicons', 'wp-theme' ) : array( 'dashicons' );
+		wp_enqueue_style( 'hm-toolkit-editor', $this->url( 'assets/page.css' ), $deps, HM_TOOLKIT_VERSION );
 		wp_enqueue_script( 'hm-toolkit-editor', $this->url( 'assets/editor.js' ), array( 'media-views' ), HM_TOOLKIT_VERSION, true );
 		wp_localize_script(
 			'hm-toolkit-editor',

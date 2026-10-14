@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       HashtagMedia Toolkit
  * Description:       Beheer, opruiming en huisstijl voor websites van HashtagMedia.
- * Version:           1.1.2
+ * Version:           1.1.3
  * Requires at least: 6.5
  * Requires PHP:      8.1
  * Author:            HashtagMedia
@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
  * Publieke constanten. Thema's kunnen met defined( 'HM_TOOLKIT_VERSION' )
  * controleren of de plugin actief is.
  */
-define( 'HM_TOOLKIT_VERSION', '1.1.2' );
+define( 'HM_TOOLKIT_VERSION', '1.1.3' );
 define( 'HM_TOOLKIT_FILE', __FILE__ );
 define( 'HM_TOOLKIT_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HM_TOOLKIT_URL', plugin_dir_url( __FILE__ ) );

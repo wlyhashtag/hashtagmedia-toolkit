@@ -27,15 +27,15 @@
 	var warned = new Set();
 
 	var ICON = {
-		pencil: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2271b1" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+		pencil: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
 		link: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>',
 		ul: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>',
 		ol: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M4 4h1v4M3.5 8h2.5M3.5 14.5c.5-1 2.5-1 2.5.3 0 1-2.5 1.7-2.5 3.2h2.5"/></svg>',
 		image: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>',
 		focus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>',
 		close: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
-		globe: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#996800" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
-		check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#68de7c" stroke-width="2.6" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>'
+		globe: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
+		check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>'
 	};
 
 	// Alleen vaste HTML; alles wat van de site komt gaat via textContent of value.
@@ -120,6 +120,7 @@
 		shadow.querySelector( '.title' ).textContent = cfg.title || '';
 		shadow.querySelector( '[data-act="focus"]' ).hidden = ! cfg.focus;
 
+		followFocus();
 		$.cancel.addEventListener( 'click', cancel );
 		$.publish.addEventListener( 'click', publish );
 
@@ -368,21 +369,32 @@
 		} );
 		frame.on( 'select', function () {
 			if ( focusOnly ) {
-				// Het mediavenster slaat het focuspunt zelf op; hier alleen de pagina bijwerken.
-				var parts = String( frame.$el.find( '.hm-focus__input' ).val() || '' ).split( ',' );
-				if ( 2 === parts.length ) {
-					document.querySelectorAll( 'img[data-hm-value="' + id + '"]' ).forEach( function ( img ) {
-						if ( img.style.objectFit ) {
-							img.style.objectPosition = parseFloat( parts[ 0 ] ) + '% ' + parseFloat( parts[ 1 ] ) + '%';
-						}
-					} );
-				}
-				return;
+				return; // Het mediavenster slaat het focuspunt zelf op (zie followFocus).
 			}
 			var att = frame.state().get( 'selection' ).first().toJSON();
 			setImage( el, att );
 		} );
 		frame.open();
+	}
+
+	// De focuspunt-kiezer (module Afbeeldingen) meldt elke klik met een jQuery-"change";
+	// de foto's op de pagina schuiven meteen mee.
+	function followFocus() {
+		if ( ! window.jQuery ) {
+			return;
+		}
+		window.jQuery( document ).on( 'change', '.hm-focus__input', function () {
+			var id = ( /attachments\[(\d+)\]/.exec( this.name || '' ) || [] )[ 1 ];
+			var parts = String( this.value || '' ).split( ',' );
+			if ( ! id || 2 !== parts.length ) {
+				return;
+			}
+			document.querySelectorAll( 'img[data-hm-value="' + id + '"]' ).forEach( function ( img ) {
+				if ( img.style.objectFit ) {
+					img.style.objectPosition = parseFloat( parts[ 0 ] ) + '% ' + parseFloat( parts[ 1 ] ) + '%';
+				}
+			} );
+		} );
 	}
 
 	function setImage( el, att ) {

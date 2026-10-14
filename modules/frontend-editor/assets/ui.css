@@ -1,11 +1,33 @@
 /*
  * Frontend-editor: de balk, werkbalken en vensters. Staat in een Shadow DOM,
  * dus het thema heeft hier geen invloed op en andersom.
- * Kleuren en lettertype van de WordPress-admin.
+ *
+ * Kleuren en lettertype komen uit de design tokens van WordPress (--wpds-*,
+ * stylesheet wp-theme, sinds WordPress 7). Verandert WordPress zijn kleuren,
+ * dan volgt de editor vanzelf. De waarde achter de komma is de terugval voor
+ * oudere WordPress-versies. Custom properties gaan door de Shadow DOM heen.
  */
 
 :host {
 	all: initial;
+	--hm-brand: var(--wpds-color-background-interactive-brand-strong, #3858e9);
+	--hm-brand-active: var(--wpds-color-background-interactive-brand-strong-active, #2e49d9);
+	--hm-on-brand: var(--wpds-color-foreground-interactive-brand-strong, #fff);
+	--hm-brand-weak: var(--wpds-color-background-surface-brand, #ecf0fa);
+	--hm-text: var(--wpds-color-foreground-content-neutral, #1e1e1e);
+	--hm-text-weak: var(--wpds-color-foreground-content-neutral-weak, #707070);
+	--hm-surface: var(--wpds-color-background-surface-neutral, #fcfcfc);
+	--hm-hover: var(--wpds-color-background-interactive-neutral-weak-active, #ededed);
+	--hm-border: var(--wpds-color-stroke-surface-neutral, #dbdbdb);
+	--hm-border-weak: var(--wpds-color-stroke-surface-neutral-weak, #f0f0f0);
+	--hm-border-input: var(--wpds-color-stroke-interactive-neutral, #8d8d8d);
+	--hm-focus: var(--wpds-color-stroke-focus, #3858e9);
+	--hm-warning: var(--wpds-color-stroke-surface-warning-strong, #926300);
+	--hm-warning-weak: var(--wpds-color-background-surface-warning-weak, #fff7e1);
+	--hm-warning-text: var(--wpds-color-foreground-content-warning, #2e1900);
+	--hm-warning-fill: var(--wpds-color-background-surface-warning, #fde6be);
+	--hm-error: var(--wpds-color-background-interactive-error-strong, #cc1818);
+	--hm-font: var(--wpds-typography-font-family-body, -apple-system, system-ui, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif);
 }
 
 * {
@@ -19,10 +41,10 @@
 .layer {
 	position: fixed;
 	z-index: 100000; /* Onder het mediavenster van WordPress (160000). */
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-family: var(--hm-font);
 	font-size: 13px;
 	line-height: 1.4;
-	color: #1d2327;
+	color: var(--hm-text);
 	-webkit-font-smoothing: antialiased;
 }
 
@@ -53,28 +75,28 @@ input {
 }
 
 .b:hover {
-	background: #f0f0f1;
+	background: var(--hm-hover);
 }
 
 .b:focus-visible,
 .tb:focus-visible,
 .res:focus-visible,
 .ico:focus-visible {
-	outline: 2px solid #2271b1;
+	outline: 2px solid var(--hm-brand);
 	outline-offset: 1px;
 }
 
 .bp {
-	background: #2271b1;
-	color: #fff;
+	background: var(--hm-brand);
+	color: var(--hm-on-brand);
 }
 
 .bp:hover {
-	background: #135e96;
+	background: var(--hm-brand-active);
 }
 
 .bp:disabled {
-	background: #a7aaad;
+	background: var(--hm-border);
 	cursor: default;
 }
 
@@ -90,6 +112,11 @@ input {
 	max-width: calc(100vw - 32px);
 }
 
+.bar > svg {
+	color: var(--hm-brand);
+	flex: none;
+}
+
 .bar .title {
 	font-weight: 600;
 	margin: 0 6px 0 8px;
@@ -103,11 +130,11 @@ input {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	color: #50575e;
+	color: var(--hm-text-weak);
 	padding: 0 10px;
 	height: 22px;
-	border-left: 1px solid #f0f0f1;
-	border-right: 1px solid #f0f0f1;
+	border-left: 1px solid var(--hm-hover);
+	border-right: 1px solid var(--hm-hover);
 	white-space: nowrap;
 }
 
@@ -115,11 +142,11 @@ input {
 	width: 7px;
 	height: 7px;
 	border-radius: 50%;
-	background: #a7aaad;
+	background: var(--hm-border);
 }
 
 .dirty .dot {
-	background: #dba617;
+	background: var(--hm-warning);
 }
 
 /* Opmaakwerkbalk */
@@ -144,13 +171,13 @@ input {
 }
 
 .tb:hover {
-	background: #f0f0f1;
+	background: var(--hm-hover);
 }
 
 .sep {
 	width: 1px;
 	height: 18px;
-	background: #dcdcde;
+	background: var(--hm-border);
 	margin: 0 3px;
 }
 
@@ -163,7 +190,7 @@ input {
 .linkform input {
 	width: 220px;
 	height: 30px;
-	border: 1px solid #dcdcde;
+	border: 1px solid var(--hm-border);
 	border-radius: 6px;
 	padding: 0 8px;
 }
@@ -172,8 +199,8 @@ input {
 .chip {
 	font-size: 11px;
 	font-weight: 500;
-	color: #fff;
-	background: #2271b1;
+	color: var(--hm-on-brand);
+	background: var(--hm-brand);
 	padding: 3px 8px;
 	border-radius: 6px;
 	pointer-events: none;
@@ -181,8 +208,8 @@ input {
 }
 
 .chip.opt {
-	color: #614a00;
-	background: #f0c33c;
+	color: var(--hm-warning-text);
+	background: var(--hm-warning-fill);
 }
 
 /* Waarschuwing bij een optieveld */
@@ -195,10 +222,11 @@ input {
 }
 
 .warn .icon {
+	color: var(--hm-warning);
 	width: 32px;
 	height: 32px;
 	border-radius: 8px;
-	background: #fcf9e8;
+	background: var(--hm-warning-weak);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -207,7 +235,7 @@ input {
 
 .warn p {
 	margin: 2px 0 0;
-	color: #50575e;
+	color: var(--hm-text-weak);
 }
 
 /* Knoppen bij een afbeelding */
@@ -243,14 +271,14 @@ input {
 	display: block;
 	font-size: 12px;
 	font-weight: 500;
-	color: #50575e;
+	color: var(--hm-text-weak);
 	margin-bottom: 6px;
 }
 
 .pop input[type="text"] {
 	width: 100%;
 	height: 38px;
-	border: 1px solid #dcdcde;
+	border: 1px solid var(--hm-border);
 	border-radius: 8px;
 	padding: 0 11px;
 	font-size: 14px;
@@ -260,15 +288,15 @@ input {
 .pop input[type="text"]:focus,
 .linkform input:focus {
 	outline: none;
-	border-color: #2271b1;
-	box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.18);
+	border-color: var(--hm-brand);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--hm-brand) 20%, transparent);
 }
 
 .results {
 	margin-top: 6px;
 	border-radius: 10px;
 	padding: 4px;
-	box-shadow: 0 0 0 1px #ececed;
+	box-shadow: 0 0 0 1px var(--hm-border);
 }
 
 .res {
@@ -285,13 +313,13 @@ input {
 }
 
 .res:hover {
-	background: #f0f6fc;
+	background: var(--hm-brand-weak);
 }
 
 .res .path {
 	margin-left: auto;
 	font-size: 12px;
-	color: #646970;
+	color: var(--hm-text-weak);
 	max-width: 140px;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -300,7 +328,7 @@ input {
 
 .hint {
 	margin: 6px 0 0;
-	color: #646970;
+	color: var(--hm-text-weak);
 	font-size: 12px;
 }
 
@@ -318,7 +346,7 @@ input {
 	width: 36px;
 	height: 20px;
 	border-radius: 10px;
-	background: #dcdcde;
+	background: var(--hm-border);
 	position: relative;
 	margin: 0;
 	cursor: pointer;
@@ -339,7 +367,7 @@ input {
 }
 
 .toggle input:checked {
-	background: #2271b1;
+	background: var(--hm-brand);
 }
 
 .toggle input:checked::after {
@@ -347,7 +375,7 @@ input {
 }
 
 .toggle input:focus-visible {
-	outline: 2px solid #2271b1;
+	outline: 2px solid var(--hm-brand);
 	outline-offset: 2px;
 }
 
@@ -364,7 +392,7 @@ input {
 	border: 0;
 	border-radius: 8px;
 	background: transparent;
-	color: #646970;
+	color: var(--hm-text-weak);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -372,11 +400,15 @@ input {
 }
 
 .ico:hover {
-	background: #f0f0f1;
-	color: #1d2327;
+	background: var(--hm-hover);
+	color: var(--hm-text);
 }
 
 /* Melding */
+.toast svg {
+	color: var(--wpds-color-stroke-surface-success, #94d29e);
+}
+
 .toast {
 	left: 50%;
 	bottom: 88px;
@@ -384,13 +416,13 @@ input {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	background: #1d2327;
-	color: #fff;
+	background: var(--hm-text);
+	color: var(--hm-surface);
 	border-radius: 10px;
 	padding: 10px 14px;
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
 }
 
 .toast.error {
-	background: #b32d2e;
+	background: var(--hm-error);
 }
