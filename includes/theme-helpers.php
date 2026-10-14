@@ -151,3 +151,127 @@ if ( ! function_exists( 'hm_image_focus' ) ) {
 		return preg_match( '/^\d{1,3}(\.\d+)?% \d{1,3}(\.\d+)?%$/', $focus ) ? $focus : '50% 50%';
 	}
 }
+
+if ( ! function_exists( 'hm_get_field' ) ) {
+	/**
+	 * HTML van een ACF-veld, bewerkbaar in de frontend-editor.
+	 *
+	 * Tekst, tekstvak, e-mail en URL komen in een element (standaard <span>),
+	 * teksteditor in een <div>, een afbeelding via hm_get_image() en een link
+	 * als <a>. Andere veldtypes geven een lege string; gebruik daarvoor
+	 * get_field(). Binnen een have_rows()-lus wordt het subveld gebruikt.
+	 *
+	 * Argumenten:
+	 * - post_id  Bericht-ID of 'option' (optiepagina); standaard de huidige pagina.
+	 * - tag      Element om tekst heen, bijv. 'h1' (geen extra <span> nodig).
+	 * - class    CSS-klassen op het element, de <a> of de afbeelding.
+	 * - Voor afbeeldingen ook alle argumenten van hm_get_image().
+	 *
+	 * @param string $name Veldnaam.
+	 * @param array  $args Argumenten.
+	 * @return string
+	 */
+	function hm_get_field( string $name, array $args = array() ): string {
+		if ( ! function_exists( 'get_field_object' ) ) {
+			return '';
+		}
+
+		$post_id = $args['post_id'] ?? false;
+		$is_sub  = function_exists( 'get_row' ) && false !== get_row();
+		$field   = $is_sub ? get_sub_field_object( $name, false ) : false;
+		if ( ! $field ) {
+			$is_sub = false;
+			$field  = get_field_object( $name, $post_id, false );
+		}
+		if ( ! $field && function_exists( 'acf_get_field' ) ) {
+			// Nog nooit opgeslagen (bijv. een nieuwe pagina): ACF vindt het veld dan niet via de pagina.
+			$field = acf_get_field( $name );
+			if ( is_array( $field ) ) {
+				$field['value'] = get_field( $name, $post_id, false );
+			}
+		}
+		if ( ! is_array( $field ) ) {
+			return '';
+		}
+
+		/**
+		 * Extra attributen op het veld, bijv. voor de frontend-editor.
+		 *
+		 * @param array      $attr    Attributen.
+		 * @param array      $field   ACF-veld met ruwe waarde.
+		 * @param int|string $post_id Bericht-ID, 'option' of false (huidige).
+		 * @param bool       $is_sub  Subveld van een herhaler of flexibele inhoud.
+		 */
+		$attr  = (array) apply_filters( 'hm_toolkit_field_attr', array(), $field, $post_id, $is_sub );
+		$value = $field['value'];
+		$class = (string) ( $args['class'] ?? '' );
+
+		switch ( $field['type'] ) {
+			case 'image':
+				if ( ! hm_image_id( $value ) ) {
+					// Lege afbeelding: alleen in de editor een vlak om op te klikken.
+					return $attr ? '<span class="hm-field-empty"' . hm_toolkit_attr_string( $attr ) . '></span>' : '';
+				}
+				$args['attr'] = array_merge( (array) ( $args['attr'] ?? array() ), $attr );
+				return hm_get_image( $value, $args );
+
+			case 'link':
+				$link = is_array( $value ) ? $value : array();
+				$url  = (string) ( $link['url'] ?? '' );
+				if ( '' === $url && ! $attr ) {
+					return '';
+				}
+				$target = '_blank' === ( $link['target'] ?? '' ) ? '_blank' : '';
+				$a      = array(
+					'href'   => '' === $url ? '#' : esc_url( $url ),
+					'class'  => $class,
+					'target' => $target,
+					'rel'    => $target ? 'noopener' : '',
+				);
+				return '<a' . hm_toolkit_attr_string( array_merge( array_filter( $a, 'strlen' ), $attr ) ) . '>' . esc_html( (string) ( $link['title'] ?? '' ) ) . '</a>';
+
+			case 'wysiwyg':
+				$html = wp_kses_post( (string) apply_filters( 'acf_the_content', (string) $value ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Filter van ACF zelf (wpautop, shortcodes).
+				$tag  = $args['tag'] ?? 'div';
+				break;
+
+			case 'textarea':
+				$html = esc_html( (string) $value );
+				if ( 'br' === ( $field['new_lines'] ?? '' ) ) {
+					$html = nl2br( $html );
+				} elseif ( 'wpautop' === ( $field['new_lines'] ?? '' ) ) {
+					$html = wpautop( $html );
+				}
+				$tag = $args['tag'] ?? 'span';
+				break;
+
+			case 'text':
+			case 'email':
+			case 'url':
+				$html = esc_html( is_scalar( $value ) ? (string) $value : '' );
+				$tag  = $args['tag'] ?? 'span';
+				break;
+
+			default:
+				return '';
+		}
+
+		if ( '' !== $class ) {
+			$attr['class'] = trim( $class . ' ' . ( $attr['class'] ?? '' ) );
+		}
+		$tag = tag_escape( (string) $tag );
+		return '<' . $tag . hm_toolkit_attr_string( $attr ) . '>' . $html . '</' . $tag . '>';
+	}
+}
+
+if ( ! function_exists( 'hm_field' ) ) {
+	/**
+	 * Toont een ACF-veld; zie hm_get_field() voor de argumenten.
+	 *
+	 * @param string $name Veldnaam.
+	 * @param array  $args Argumenten.
+	 */
+	function hm_field( string $name, array $args = array() ): void {
+		echo hm_get_field( $name, $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Opgebouwd met esc_html(), esc_url(), wp_kses_post() en hm_toolkit_attr_string().
+	}
+}

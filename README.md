@@ -85,6 +85,7 @@ De kern laadt bij elk verzoek alleen de modules die aanstaan. De modulemap wordt
 | `hm_toolkit_image_focus` | filter | Focuspunt als CSS-waarde (module Afbeeldingen vult dit). |
 | `hm_toolkit_shortcuts` | filter | Groepen snelkoppelingen, in de vorm van `modules/snelkoppelingen/links.php`. |
 | `hm_toolkit_form_button_class` | filter | Knopklasse van de verzendknop (standaard `knop`). |
+| `hm_toolkit_field_attr` | filter | Attributen op een veld van `hm_field()` (module Frontend-editor vult dit). |
 
 ## Omgevingslabel
 
@@ -199,6 +200,19 @@ Knoppen naar de juiste plek in Complianz, Yoast, Gravity Forms, WP Rocket (ook "
 - **ACF-keuzeveld**: een veld van het type *Select* met de naam `formulier` krijgt vanzelf alle actieve formulieren als keuze (`acf/prepare_field`). Het thema toont het met `hm_form( get_field( 'formulier' ) )`.
 - **Testformulier**: tabblad Formulieren, knop "Testformulier aanmaken" (alleen beheerders). Alle veldtypes; bestaat het al, dan opent het.
 - **Geen eigen CSS.** Gravity Forms (Orbital) doet de opmaak; het thema geeft zijn kleuren door met `gform_default_styles` (zie `THEMA-AFSPRAKEN.md`). GF rekent zelf de varianten uit (donkerder, lichter, contrast, focusrand).
+
+## Module Frontend-editor (beveiligingsgevoelig)
+
+Teksten, afbeeldingen en knoppen op de pagina zelf bewerken. Werkt alleen met velden die het thema toont met `hm_field()` (zie `THEMA-AFSPRAKEN.md`). Ontwerp: overlay over de site, neutraal in de kleuren van WordPress.
+
+- **Starten**: knop "Pagina bewerken" in de adminbalk, alleen als er op de pagina iets is dat de gebruiker mag bewerken, en niet op de telefoon (smaller dan 783 px).
+- **Bewerken**: tekst, tekstvak, e-mail en URL direct in de pagina; teksteditor met een kleine werkbalk (vet, cursief, link, lijstjes); afbeelding via het mediavenster (Vervangen, Focuspunt); link als knop via een venster met knoptekst, link (pagina zoeken of adres plakken) en nieuw tabblad. Geplakte tekst komt altijd zonder opmaak binnen.
+- **Optievelden** (ACF-optiepagina): geel label "Elke pagina" en een waarschuwing dat de wijziging overal zichtbaar wordt.
+- **Publiceren**: alle wijzigingen in één verzoek naar `POST /wp-json/hm-toolkit/v1/velden`. Per veld opnieuw gecontroleerd: bestaat het, staat het op het hoogste niveau van een veldgroep, mag de gebruiker het bericht bewerken (`edit_post`) of de optiepagina openen (het recht van die optiepagina), en is de waarde geldig. Eén fout = niets opgeslagen. Saneren per type (`sanitize_text_field`, `wp_kses_post`, `esc_url_raw`, alleen bestaande afbeeldingen). Daarna de cache van WP Rocket legen: de pagina, of de hele site bij een optieveld.
+- **Annuleren** gooit alles weg (pagina herladen). Weggaan met openstaande wijzigingen vraagt eerst om bevestiging.
+- **Focuspunt** slaat het mediavenster meteen op, net als in de mediabibliotheek; dat gaat niet via Publiceren.
+- **Nog niet** (volgende delen): lijsten (herhalers, flexibele inhoud) in het zijpaneel, het logboek met terugzetten.
+- De balk en vensters staan in een Shadow DOM (`assets/ui.css`), zodat het thema ze niet kan verstoren. Op de pagina zelf alleen randen om de velden (`assets/page.css`).
 
 ## Module Updates
 

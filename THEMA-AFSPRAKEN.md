@@ -23,7 +23,7 @@ De skill *wp-thema-uit-ontwerp* volgt deze afspraken. Verandert hier iets, werk 
 | Opmaak, secties, ACF-velden voor inhoud | – | ✔ |
 | Emoji-scripts uit, fonts, eigen JS en CSS | – | ✔ |
 | Gravity Forms | Honeypot altijd aan, verzendknop als `<button>` met knopklasse, ACF-keuzeveld `formulier`, `hm_form()`, testformulier (module Formulieren) | Kleuren via `gform_default_styles`; knopklasse via `hm_toolkit_form_button_class` als die niet `knop` heet |
-| Frontend-editor | Fase 3: `hm_field()` | Tot fase 3: gewoon `get_field()` |
+| Frontend-editor | Bewerkbaar maken van velden die via `hm_field()` op de pagina staan | Tekst, afbeeldingen en knoppen uit ACF tonen met `hm_field()`, niet met `get_field()` |
 
 ## Toolkit-functies voor het thema
 
@@ -40,6 +40,23 @@ hm_image( $id_of_acf_afbeelding, array(
 $html = hm_get_image( $id, $args ); // geeft de HTML terug
 $pos  = hm_image_focus( $id );      // '30% 65%' voor background-position
 ```
+
+Bewerkbare velden (frontend-editor). Tekst, tekstvak, teksteditor, e-mail, URL, afbeelding en link:
+
+```php
+hm_field( 'titel', array( 'tag' => 'h1', 'class' => 'hero__titel' ) ); // <h1> met de tekst, geen extra <span>
+hm_field( 'intro' );                                                  // teksteditor: <div> met de opgemaakte tekst
+hm_field( 'foto', array( 'fit' => 'cover', 'priority' => true ) );     // afbeelding: alle argumenten van hm_image()
+hm_field( 'knop', array( 'class' => 'knop' ) );                        // link-veld: <a class="knop">
+hm_field( 'telefoon', array( 'post_id' => 'option' ) );                // veld van de optiepagina
+$html = hm_get_field( 'titel' );                                       // geeft de HTML terug
+```
+
+- Bezoekers krijgen gewone HTML; alleen wie mag bewerken krijgt `data-hm-*`-attributen. Gebruik voor tekst `tag` als het element alleen de tekst bevat; anders komt er een `<span>` (teksteditor: `<div>`) omheen.
+- Binnen `have_rows()` toont `hm_field()` het subveld. Subvelden zijn pas bewerkbaar met het zijpaneel (volgt).
+- Andere veldtypes (keuzes, getallen, relaties): gewoon `get_field()`.
+- Optiepagina's met de standaard `post_id` (`options`) werken; een eigen `post_id` niet.
+- Het thema heeft de gebruikelijke `.screen-reader-text`-regel nodig (het mediavenster gebruikt hem).
 
 Formulieren (ACF-veld van het type *Select* met de naam `formulier`; de toolkit vult de keuzes):
 

@@ -99,7 +99,19 @@ final class Module extends Base {
 
 		if ( $this->get( 'focus' ) ) {
 			add_filter( 'hm_toolkit_image_focus', array( $this, 'focus_css' ), 10, 2 );
+			if ( ! is_admin() ) {
+				// Mediavenster op de site zelf (frontend-editor): ook de focuspunt-kiezer.
+				add_action( 'wp_enqueue_media', array( $this, 'enqueue_focus' ) );
+			}
 		}
+	}
+
+	/**
+	 * Script en stijl van de focuspunt-kiezer.
+	 */
+	public function enqueue_focus(): void {
+		require_once $this->path( 'admin/class-focus.php' );
+		( new Focus( $this ) )->enqueue();
 	}
 
 	/**

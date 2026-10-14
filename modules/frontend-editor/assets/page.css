@@ -1,0 +1,87 @@
+/*
+ * Frontend-editor: alleen wat op de pagina zelf moet (randen om velden).
+ * De balk, werkbalken en vensters staan in een Shadow DOM met ui.css, zodat
+ * het thema ze niet kan verstoren.
+ */
+
+/* Geen knop op de telefoon. */
+@media (max-width: 782px) {
+	#wp-admin-bar-hm-toolkit-bewerken {
+		display: none !important;
+	}
+}
+
+#wp-admin-bar-hm-toolkit-bewerken > .ab-item .ab-icon::before {
+	top: 2px;
+}
+
+/* Bewerkmodus: adminbalk weg, de site op volle hoogte. */
+html.hm-te-on {
+	margin-top: 0 !important;
+}
+
+html.hm-te-on #wpadminbar {
+	display: none !important;
+}
+
+html.hm-te-on [data-hm-field] {
+	outline: 1px dashed rgba(100, 105, 112, 0.7);
+	outline-offset: 4px;
+	border-radius: 2px;
+	cursor: text;
+	transition: outline-color 0.1s;
+}
+
+html.hm-te-on [data-hm-type="image"],
+html.hm-te-on [data-hm-type="link"] {
+	cursor: pointer;
+}
+
+html.hm-te-on [data-hm-field]:hover,
+html.hm-te-on [data-hm-field]:focus {
+	outline: 2px solid #2271b1;
+	outline-offset: 4px;
+}
+
+html.hm-te-on [data-hm-post="option"]:hover,
+html.hm-te-on [data-hm-post="option"]:focus {
+	outline-color: #f0c33c;
+}
+
+html.hm-te-on [data-hm-field].hm-te-changed {
+	outline: 2px dashed #dba617;
+}
+
+html.hm-te-on [data-hm-field]:focus {
+	outline-style: solid;
+}
+
+/* Leeg tekstveld: de naam van het veld als hint, zodat er iets aan te klikken is. */
+html.hm-te-on [data-hm-field]:empty::before {
+	content: attr(data-hm-label);
+	opacity: 0.45;
+}
+
+/* Lege afbeelding (alleen in de bewerkmodus zichtbaar). */
+.hm-field-empty {
+	display: none;
+}
+
+html.hm-te-on .hm-field-empty {
+	display: block;
+	min-height: 160px;
+	background: rgba(100, 105, 112, 0.08);
+}
+
+/* Het mediavenster leunt op .screen-reader-text van het thema; zonder die regel staan verborgen teksten over elkaar. */
+.media-modal .screen-reader-text {
+	border: 0;
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+	word-wrap: normal !important;
+}
