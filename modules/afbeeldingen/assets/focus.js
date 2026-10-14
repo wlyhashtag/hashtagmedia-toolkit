@@ -16,8 +16,15 @@
 		y = round( y );
 		$picker.find( '.hm-focus__dot' ).css( { left: x + '%', top: y + '%' } );
 		$picker.find( '.hm-focus__value' ).text( x + '% ' + y + '%' );
+		var $input = $picker.find( '.hm-focus__input' ).val( x + ',' + y );
+		if ( document.documentElement.classList.contains( 'hm-te-on' ) ) {
+			// Frontend-editor aan: niet meteen opslaan, de editor neemt het mee bij Publiceren.
+			var id = ( /attachments\[(\d+)\]/.exec( $input.attr( 'name' ) || '' ) || [] )[ 1 ];
+			document.dispatchEvent( new CustomEvent( 'hm-toolkit-focus', { detail: { id: id, value: x + ',' + y } } ) );
+			return;
+		}
 		// "change" laat WordPress het veld opslaan (mediavenster) of meesturen (bewerkscherm).
-		$picker.find( '.hm-focus__input' ).val( x + ',' + y ).trigger( 'change' );
+		$input.trigger( 'change' );
 	}
 
 	function current( $picker ) {

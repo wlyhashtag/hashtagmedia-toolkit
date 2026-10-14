@@ -99,11 +99,52 @@ final class Module extends Base {
 
 		if ( $this->get( 'focus' ) ) {
 			add_filter( 'hm_toolkit_image_focus', array( $this, 'focus_css' ), 10, 2 );
+			add_filter( 'hm_toolkit_save_focus', array( $this, 'save_focus' ), 10, 3 );
 			if ( ! is_admin() ) {
 				// Mediavenster op de site zelf (frontend-editor): ook de focuspunt-kiezer.
 				add_action( 'wp_enqueue_media', array( $this, 'enqueue_focus' ) );
 			}
 		}
+	}
+
+	/**
+	 * Slaat een focuspunt op ("x,y" in procent). Het midden (50,50) wist het.
+	 * Bij een ander punt wordt de hele cache van WP Rocket geleegd, want de
+	 * afbeelding kan overal op de site staan. Rechten controleert de aanroeper.
+	 *
+	 * @param int    $id    Afbeelding.
+	 * @param string $value Bijv. "30,65.5".
+	 * @return bool Geldige waarde?
+	 */
+	public function set_focus( int $id, string $value ): bool {
+		if ( ! preg_match( '/^(\d{1,3}(?:\.\d+)?),(\d{1,3}(?:\.\d+)?)$/', sanitize_text_field( $value ), $m ) ) {
+			return false;
+		}
+		$x   = max( 0.0, min( 100.0, (float) $m[1] ) );
+		$y   = max( 0.0, min( 100.0, (float) $m[2] ) );
+		$old = (string) get_post_meta( $id, self::FOCUS_META, true );
+		$new = ( 50.0 === $x && 50.0 === $y ) ? '' : self::number( $x ) . ',' . self::number( $y );
+		if ( '' === $new ) {
+			delete_post_meta( $id, self::FOCUS_META );
+		} else {
+			update_post_meta( $id, self::FOCUS_META, $new );
+		}
+		if ( $old !== $new && function_exists( 'rocket_clean_domain' ) ) {
+			rocket_clean_domain();
+		}
+		return true;
+	}
+
+	/**
+	 * Filter hm_toolkit_save_focus: de frontend-editor publiceert een focuspunt.
+	 *
+	 * @param bool   $saved Al opgeslagen.
+	 * @param int    $id    Afbeelding (rechten zijn al gecontroleerd).
+	 * @param string $value "x,y".
+	 * @return bool
+	 */
+	public function save_focus( $saved, $id, $value ): bool {
+		return $saved || $this->set_focus( (int) $id, (string) $value );
 	}
 
 	/**

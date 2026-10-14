@@ -209,8 +209,21 @@ final class Module extends Base {
 		}
 
 		$clean = array();
+		$focus = array();
 		foreach ( (array) $request->get_param( 'changes' ) as $change ) {
 			$change = is_array( $change ) ? $change : array();
+
+			// Focuspunt van een afbeelding: opslaan doet de module Afbeeldingen (filter hm_toolkit_save_focus).
+			if ( 'focus' === ( $change['key'] ?? '' ) ) {
+				$id    = absint( $change['post'] ?? 0 );
+				$value = is_scalar( $change['value'] ?? null ) ? (string) $change['value'] : '';
+				if ( ! has_filter( 'hm_toolkit_save_focus' ) || ! wp_attachment_is_image( $id ) || ! current_user_can( 'edit_post', $id ) || ! preg_match( '/^\d{1,3}(\.\d+)?,\d{1,3}(\.\d+)?$/', $value ) ) {
+					return new \WP_Error( 'hm_toolkit_focus', __( 'Het focuspunt kon niet worden opgeslagen. Er is niets opgeslagen.', 'hashtagmedia-toolkit' ), array( 'status' => 403 ) );
+				}
+				$focus[ $id ] = $value;
+				continue;
+			}
+
 			$field  = acf_get_field( sanitize_text_field( (string) ( $change['key'] ?? '' ) ) );
 			$target = 'option' === ( $change['post'] ?? '' ) ? 'option' : absint( $change['post'] ?? 0 );
 
@@ -235,10 +248,13 @@ final class Module extends Base {
 		foreach ( $clean as list( $key, $target, $value ) ) {
 			update_field( $key, wp_slash( $value ), $target ); // ACF verwacht geslashte waarden, net als $_POST.
 		}
+		foreach ( $focus as $id => $value ) {
+			apply_filters( 'hm_toolkit_save_focus', false, $id, $value ); // Leegt zelf de cache als het punt verandert.
+		}
 
 		return rest_ensure_response(
 			array(
-				'saved' => count( $clean ),
+				'saved' => count( $clean ) + count( $focus ),
 				'cache' => self::purge_cache( array_unique( array_column( $clean, 1 ) ) ),
 			)
 		);

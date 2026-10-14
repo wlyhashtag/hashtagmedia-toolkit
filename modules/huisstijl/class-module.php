@@ -12,14 +12,15 @@ use HashtagMedia\Toolkit\Module as Base;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Login, kleurenschema, footer, omgevingslabel en het klantdashboard.
+ * Login, adminbalk op de site in de kleuren van het profiel, footer,
+ * omgevingslabel en het klantdashboard.
  */
 final class Module extends Base {
 
 	/**
-	 * Naam van het kleurenschema.
+	 * Standaard-kleurenschema van WordPress sinds 7.0 (het moderne blauw).
 	 */
-	public const SCHEME = 'hashtagmedia';
+	private const DEFAULT_SCHEME = 'modern';
 
 	/**
 	 * Standaardwaarden.
@@ -29,7 +30,6 @@ final class Module extends Base {
 	public function defaults(): array {
 		return array(
 			'login'         => true,
-			'scheme'        => true,
 			'footer'        => true,
 			'environment'   => true,
 			'dashboard'     => true,
@@ -78,6 +78,9 @@ final class Module extends Base {
 			add_filter( 'login_headertext', array( $this, 'login_text' ) );
 		}
 
+		// Adminbalk op de site in dezelfde kleuren als in de admin.
+		add_action( 'wp_enqueue_scripts', array( $this, 'admin_bar_colors' ) );
+
 		if ( $this->get( 'environment' ) ) {
 			add_action( 'admin_bar_menu', array( $this, 'environment_node' ), 100 );
 			add_action( 'wp_enqueue_scripts', array( $this, 'environment_styles' ) );
@@ -89,11 +92,6 @@ final class Module extends Base {
 	 * Alleen admin.
 	 */
 	public function admin(): void {
-		if ( $this->get( 'scheme' ) ) {
-			add_action( 'admin_init', array( $this, 'register_scheme' ) );
-			add_filter( 'get_user_option_admin_color', array( $this, 'force_scheme' ) );
-			add_action( 'admin_init', array( $this, 'remove_scheme_picker' ) );
-		}
 
 		if ( $this->get( 'footer' ) ) {
 			add_filter( 'admin_footer_text', array( $this, 'footer_text' ), PHP_INT_MAX );
@@ -135,37 +133,35 @@ final class Module extends Base {
 	}
 
 	/**
-	 * HashtagMedia-kleurenschema registreren.
+	 * De adminbalk op de site krijgt de kleuren van het schema uit het profiel
+	 * (standaard het moderne blauw). WordPress laadt dat schema alleen in de
+	 * admin; hier worden de regels voor de adminbalk uit hetzelfde bestand
+	 * gehaald, zodat ze vanzelf meegaan met WordPress. Het oude schema "Fresh"
+	 * heeft geen bestand: dat zijn de kleuren die de adminbalk al heeft.
 	 */
-	public function register_scheme(): void {
-		wp_admin_css_color(
-			self::SCHEME,
-			__( 'HashtagMedia', 'hashtagmedia-toolkit' ),
-			$this->url( 'assets/scheme/colors.min.css' ),
-			array( '#00151f', '#0077a3', '#00adef', '#e7f1f6' ),
-			array(
-				'base'    => '#e7f1f6',
-				'focus'   => '#ffffff',
-				'current' => '#ffffff',
-			)
-		);
-	}
+	public function admin_bar_colors(): void {
+		if ( ! is_admin_bar_showing() ) {
+			return;
+		}
+		$scheme = sanitize_key( (string) get_user_option( 'admin_color' ) );
+		$scheme = '' !== $scheme ? $scheme : self::DEFAULT_SCHEME;
+		$file   = ABSPATH . 'wp-admin/css/colors/' . $scheme . '/colors.min.css';
+		if ( ! is_readable( $file ) ) {
+			return;
+		}
 
-	/**
-	 * Kleurkeuze uit het profiel halen. WordPress koppelt deze pas na
-	 * plugins_loaded, dus pas hier verwijderen.
-	 */
-	public function remove_scheme_picker(): void {
-		remove_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
-	}
-
-	/**
-	 * Iedereen gebruikt het HashtagMedia-schema.
-	 *
-	 * @return string
-	 */
-	public function force_scheme(): string {
-		return self::SCHEME;
+		$source = (string) preg_replace( '#/\*.*?\*/#s', '', (string) file_get_contents( $file ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Lokaal bestand van WordPress zelf.
+		$css    = '';
+		if ( preg_match_all( '/([^{}]+)\{([^{}]*)\}/', $source, $rules, PREG_SET_ORDER ) ) {
+			foreach ( $rules as $rule ) {
+				if ( false !== strpos( $rule[1], '#wpadminbar' ) ) {
+					$css .= trim( $rule[1] ) . '{' . $rule[2] . '}';
+				}
+			}
+		}
+		if ( '' !== $css ) {
+			wp_add_inline_style( 'admin-bar', $css );
+		}
 	}
 
 	/**
@@ -342,7 +338,6 @@ final class Module extends Base {
 			<?php
 			$this->checkbox_row( 'dashboard', __( 'Dashboard', 'hashtagmedia-toolkit' ), __( 'Vast klantdashboard met welkom, snelle acties, inzendingen en recent bewerkt', 'hashtagmedia-toolkit' ) );
 			$this->checkbox_row( 'login', __( 'Loginpagina', 'hashtagmedia-toolkit' ), __( 'HashtagMedia-logo en -kleuren op de loginpagina', 'hashtagmedia-toolkit' ) );
-			$this->checkbox_row( 'scheme', __( 'Kleurenschema', 'hashtagmedia-toolkit' ), __( 'HashtagMedia-kleurenschema voor alle gebruikers', 'hashtagmedia-toolkit' ), __( 'De keuze voor een kleurenschema in het profiel verdwijnt.', 'hashtagmedia-toolkit' ) );
 			$this->checkbox_row( 'footer', __( 'Footertekst', 'hashtagmedia-toolkit' ), __( '"Website door HashtagMedia" met een link naar support', 'hashtagmedia-toolkit' ) );
 			$environment = self::environment();
 			$this->checkbox_row(
@@ -382,7 +377,7 @@ final class Module extends Base {
 	 * @return array
 	 */
 	public function sanitize( array $input ): array {
-		$clean = $this->sanitize_checkboxes( $input, array( 'login', 'scheme', 'footer', 'environment', 'dashboard' ) );
+		$clean = $this->sanitize_checkboxes( $input, array( 'login', 'footer', 'environment', 'dashboard' ) );
 
 		$clean['contact_email'] = sanitize_email( (string) ( $input['contact_email'] ?? '' ) );
 		$clean['contact_hours'] = sanitize_textarea_field( (string) ( $input['contact_hours'] ?? '' ) );

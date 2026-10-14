@@ -86,6 +86,7 @@ De kern laadt bij elk verzoek alleen de modules die aanstaan. De modulemap wordt
 | `hm_toolkit_shortcuts` | filter | Groepen snelkoppelingen, in de vorm van `modules/snelkoppelingen/links.php`. |
 | `hm_toolkit_form_button_class` | filter | Knopklasse van de verzendknop (standaard `knop`). |
 | `hm_toolkit_field_attr` | filter | Attributen op een veld van `hm_field()` (module Frontend-editor vult dit). |
+| `hm_toolkit_save_focus` | filter | Focuspunt opslaan vanuit de frontend-editor (module Afbeeldingen doet dit). |
 
 ## Omgevingslabel
 
@@ -210,7 +211,7 @@ Teksten, afbeeldingen en knoppen op de pagina zelf bewerken. Werkt alleen met ve
 - **Optievelden** (ACF-optiepagina): geel label "Elke pagina" en een waarschuwing dat de wijziging overal zichtbaar wordt.
 - **Publiceren**: alle wijzigingen in één verzoek naar `POST /wp-json/hm-toolkit/v1/velden`. Per veld opnieuw gecontroleerd: bestaat het, staat het op het hoogste niveau van een veldgroep, mag de gebruiker het bericht bewerken (`edit_post`) of de optiepagina openen (het recht van die optiepagina), en is de waarde geldig. Eén fout = niets opgeslagen. Saneren per type (`sanitize_text_field`, `wp_kses_post`, `esc_url_raw`, alleen bestaande afbeeldingen). Daarna de cache van WP Rocket legen: de pagina, of de hele site bij een optieveld.
 - **Annuleren** gooit alles weg (pagina herladen). Weggaan met openstaande wijzigingen vraagt eerst om bevestiging.
-- **Focuspunt** slaat het mediavenster meteen op, net als in de mediabibliotheek; dat gaat niet via Publiceren. De foto op de pagina schuift bij elke klik in de kiezer meteen mee, en de module Afbeeldingen leegt bij een gewijzigd focuspunt de hele cache van WP Rocket (de afbeelding kan overal staan).
+- **Focuspunt**: in de bewerkmodus slaat de kiezer niet meteen op; de foto schuift mee en het punt telt als wijziging voor Publiceren (Annuleren draait het terug). Opslaan doet de module Afbeeldingen via het filter `hm_toolkit_save_focus`; die leegt bij een ander punt de hele cache van WP Rocket. In de mediabibliotheek in de admin slaat de kiezer wel meteen op.
 - **Nog niet** (volgende delen): lijsten (herhalers, flexibele inhoud) in het zijpaneel, het logboek met terugzetten.
 - De balk en vensters staan in een Shadow DOM (`assets/ui.css`), zodat het thema ze niet kan verstoren. Op de pagina zelf alleen randen om de velden (`assets/page.css`).
 - **Kleuren**: uit de design tokens van WordPress 7 (`--wpds-*`, stylesheet `wp-theme`). Verandert WordPress zijn kleuren, dan volgt de editor vanzelf; op oudere WordPress-versies gelden de terugvalwaarden in de CSS.

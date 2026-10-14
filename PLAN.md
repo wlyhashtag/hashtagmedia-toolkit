@@ -62,7 +62,7 @@ Elf modules, waarvan acht groen; alleen de Gravity Forms-styling, de focuspunt-k
 De plugin volgt de standaardstijl van WordPress; alleen wat de klant als eerste ziet en de frontend-editor krijgen een eigen vormgeving.
 
 - **Instellingen:** één menu-item "HashtagMedia" met tabbladen per onderdeel; per module een schakelaar met één regel uitleg. Alleen WordPress' eigen CSS, geen zware frameworks.
-- **Admin-kleurenschema:** een eigen HashtagMedia-schema via de officiële WordPress-functie, zodat de admin eigen voelt maar WordPress blijft.
+- **Admin-kleurenschema:** het schema uit het profiel van de gebruiker, standaard dat van WordPress (sinds 7.0 het moderne blauw). De adminbalk op de site volgt hetzelfde schema. Geen eigen HashtagMedia-schema meer (besloten 14 oktober 2026).
 - **Loginpagina en welkomstwidget:** HashtagMedia-branding.
 - **Frontend-editor:** zo intuïtief mogelijk en modern vormgegeven, met een eigen ontwerp. Volledig afgeschermd van de CSS van het thema, zodat geen enkel thema de editor kan verstoren.
 

@@ -369,7 +369,7 @@
 		} );
 		frame.on( 'select', function () {
 			if ( focusOnly ) {
-				return; // Het mediavenster slaat het focuspunt zelf op (zie followFocus).
+				return; // Het focuspunt komt via followFocus().
 			}
 			var att = frame.state().get( 'selection' ).first().toJSON();
 			setImage( el, att );
@@ -377,15 +377,13 @@
 		frame.open();
 	}
 
-	// De focuspunt-kiezer (module Afbeeldingen) meldt elke klik met een jQuery-"change";
-	// de foto's op de pagina schuiven meteen mee.
+	// De focuspunt-kiezer (module Afbeeldingen) slaat in de bewerkmodus niet zelf
+	// op, maar meldt elke klik. De foto's schuiven meteen mee; opslaan gebeurt
+	// bij Publiceren, net als de rest.
 	function followFocus() {
-		if ( ! window.jQuery ) {
-			return;
-		}
-		window.jQuery( document ).on( 'change', '.hm-focus__input', function () {
-			var id = ( /attachments\[(\d+)\]/.exec( this.name || '' ) || [] )[ 1 ];
-			var parts = String( this.value || '' ).split( ',' );
+		document.addEventListener( 'hm-toolkit-focus', function ( event ) {
+			var id = parseInt( event.detail && event.detail.id, 10 );
+			var parts = String( event.detail && event.detail.value ).split( ',' );
 			if ( ! id || 2 !== parts.length ) {
 				return;
 			}
@@ -394,6 +392,8 @@
 					img.style.objectPosition = parseFloat( parts[ 0 ] ) + '% ' + parseFloat( parts[ 1 ] ) + '%';
 				}
 			} );
+			changes.set( 'focus|' + id, { post: id, key: 'focus', value: event.detail.value } );
+			render();
 		} );
 	}
 

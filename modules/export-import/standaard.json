@@ -43,7 +43,6 @@
         },
         "huisstijl": {
             "login": true,
-            "scheme": true,
             "footer": true,
             "environment": true,
             "dashboard": true
