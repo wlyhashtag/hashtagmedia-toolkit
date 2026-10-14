@@ -129,6 +129,7 @@ final class Module extends Base {
 		if ( $this->get( 'ad_links' ) ) {
 			add_action( 'admin_menu', array( $this, 'remove_external_menu_links' ), PHP_INT_MAX );
 			add_filter( 'plugin_action_links', array( $this, 'remove_external_action_links' ), 9999 );
+			add_action( 'load-plugins.php', array( $this, 'filter_plugin_action_links' ) );
 		}
 
 		add_action( 'admin_menu', array( $this, 'apply_profile_menus' ), PHP_INT_MAX );
@@ -225,6 +226,16 @@ final class Module extends Base {
 			}
 		}
 		return $actions;
+	}
+
+	/**
+	 * Veel plugins (Yoast, Complianz) voegen hun links toe met het filter per
+	 * plugin, dat na het algemene filter draait. Dat filter ook opschonen.
+	 */
+	public function filter_plugin_action_links(): void {
+		foreach ( (array) get_option( 'active_plugins', array() ) as $file ) {
+			add_filter( 'plugin_action_links_' . $file, array( $this, 'remove_external_action_links' ), 9999 );
+		}
 	}
 
 	/**

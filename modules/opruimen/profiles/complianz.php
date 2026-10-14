@@ -18,7 +18,7 @@ return array(
 	),
 	'menu'     => array(),
 	'adminbar' => array(),
-	'columns'  => array(),
+	'columns'  => array( 'cmplz_scan' ), // Scan-kolom met knop "Upgrade" in de pagina-lijst.
 	'css'      => array(
 		'.cmplz-upgrade-to-premium',
 		'.cmplz-grid-item-footer-upsell-bar',

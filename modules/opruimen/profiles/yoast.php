@@ -21,6 +21,10 @@ return array(
 			'wpseo_page_support',   // Support.
 			'wpseo_brand_insights', // AI Brand Insights (upsell).
 			'wpseo_brand_insights_premium',
+			'wpseo_upgrade_sidebar', // Upgrade-knop onderaan het menu.
+		),
+		'tools.php'       => array(
+			'wpseo_redirects_tools', // Yoast Redirects (Premium-upsell).
 		),
 	),
 	'adminbar' => array( 'wpseo-menu' ),
@@ -42,8 +46,22 @@ return array(
 		'#sidebar-container.wpseo_content_cell',
 		'[class*="yoast"][class*="upsell"]',
 		'[class*="yst"][class*="upsell"]',
+		'#webinar-promo-notification',
+		// Premium-knoppen in de metabox; zonder id-houder blijft er een lege rand over.
+		'.yst-root:has(> #yoast-additional-keyphrase-metabox-modal-open-button)',
+		'.yst-root:has(> #yoast-internal-linking-suggestions-metabox-modal-open-button)',
 	),
 	'hooks'    => static function () {
+		// Zonder wpseo_manage_options (de klant) hangt het Yoast-menu aan
+		// Academy en bevat het alleen upsells. SEO per pagina blijft.
+		add_action(
+			'admin_menu',
+			static function () {
+				remove_menu_page( 'wpseo_page_academy' );
+			},
+			PHP_INT_MAX
+		);
+
 		// Metabox onderaan de bewerkpagina.
 		add_filter(
 			'wpseo_metabox_prio',

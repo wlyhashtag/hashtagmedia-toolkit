@@ -29,6 +29,7 @@ return array(
 		'.wf-upgrade-callout',
 		'[class*="wf-"][class*="upsell"]',
 		'#wf-onboarding-plugin-header',
+		'.wf-block-list-horizontal > li:has(.wf-btn-callout-subtle)', // "Premium Protection Disabled".
 	),
 	'hooks'    => null,
 );
