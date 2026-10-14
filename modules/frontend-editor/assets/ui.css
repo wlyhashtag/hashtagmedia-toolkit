@@ -55,7 +55,8 @@
 }
 
 button,
-input {
+input,
+textarea {
 	font: inherit;
 	color: inherit;
 }
@@ -425,4 +426,268 @@ input {
 
 .toast.error {
 	background: var(--hm-error);
+}
+
+/* Zijpaneel voor lijsten (herhalers, flexibele inhoud) */
+.panel {
+	top: 16px;
+	right: 16px;
+	bottom: 16px;
+	width: 400px;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border-radius: 16px;
+}
+
+.panel > header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 18px 14px 14px 20px;
+}
+
+.ptitle {
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.psub {
+	color: var(--hm-text-weak);
+	margin-top: 3px;
+}
+
+.plist {
+	flex: 1;
+	overflow: auto;
+	padding: 4px 16px 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.panel > footer {
+	padding: 8px 16px 16px;
+}
+
+.padd {
+	width: 100%;
+	justify-content: center;
+	height: 44px;
+	border-radius: 10px;
+	color: var(--hm-brand);
+	background: var(--hm-brand-weak);
+}
+
+.padd:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.pempty {
+	margin: 8px 0;
+	color: var(--hm-text-weak);
+}
+
+.pcard {
+	flex: none;
+	border-radius: 12px;
+	background: #fff;
+	box-shadow: 0 0 0 1px var(--hm-border-weak);
+}
+
+.pcard:hover {
+	box-shadow: 0 0 0 1px var(--hm-border);
+}
+
+.pcard.open {
+	background: color-mix(in srgb, var(--hm-border-weak) 55%, #fff);
+	box-shadow: 0 0 0 2px var(--hm-brand);
+}
+
+.pcard.dragging {
+	opacity: 0.4;
+}
+
+.pcard.drop-before {
+	box-shadow: 0 -4px 0 -1px var(--hm-brand), 0 0 0 1px var(--hm-border);
+}
+
+.pcard.drop-after {
+	box-shadow: 0 4px 0 -1px var(--hm-brand), 0 0 0 1px var(--hm-border);
+}
+
+.phead {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 8px;
+}
+
+.pmain {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	text-align: left;
+	cursor: pointer;
+}
+
+.pmain:focus-visible {
+	outline: 2px solid var(--hm-brand);
+	outline-offset: 2px;
+}
+
+.pthumb {
+	width: 44px;
+	height: 44px;
+	flex: none;
+	border-radius: 8px;
+	background: var(--hm-hover) center / cover no-repeat;
+}
+
+.ptext {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.pt,
+.ps {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.pt {
+	font-weight: 600;
+}
+
+.ps {
+	color: var(--hm-text-weak);
+}
+
+.grip {
+	cursor: grab;
+}
+
+.svg {
+	display: inline-flex;
+}
+
+.pbody {
+	padding: 6px 14px 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.pfield .lbl {
+	display: block;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--hm-text-weak);
+	margin-bottom: 6px;
+}
+
+.inp {
+	display: block;
+	width: 100%;
+	border: 1px solid var(--hm-border);
+	border-radius: 8px;
+	padding: 9px 11px;
+	font-size: 14px;
+	line-height: 1.4;
+	background: #fff;
+}
+
+.inp:focus {
+	outline: none;
+	border-color: var(--hm-brand);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--hm-brand) 20%, transparent);
+}
+
+textarea.inp {
+	resize: vertical;
+}
+
+.rich {
+	min-height: 90px;
+	max-height: 220px;
+	overflow: auto;
+}
+
+.rich p {
+	margin: 0 0 0.6em;
+}
+
+.rich > :last-child {
+	margin-bottom: 0;
+}
+
+.pimg {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px;
+	border-radius: 10px;
+	background: #fff;
+	box-shadow: 0 0 0 1px var(--hm-border-weak);
+}
+
+.pimgthumb {
+	width: 64px;
+	height: 48px;
+	flex: none;
+	border-radius: 6px;
+	background: var(--hm-hover) center / cover no-repeat;
+}
+
+.pimgname {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--hm-text-weak);
+}
+
+.plink {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.menu {
+	position: absolute;
+	width: 180px;
+	padding: 4px;
+	border-radius: 10px;
+	background: #fff;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.menu .b {
+	width: 100%;
+	justify-content: flex-start;
+}
+
+.menu .b:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+.menu .b.danger {
+	color: var(--hm-error);
+}
+
+/* Bij een open paneel staan de balk en meldingen in het deel van de pagina dat vrij blijft. */
+:host(.panel-on) .bar,
+:host(.panel-on) .toast {
+	left: calc(50% - 208px);
 }

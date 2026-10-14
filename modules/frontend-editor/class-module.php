@@ -10,8 +10,13 @@
  * alles klopt wordt er opgeslagen en de cache van WP Rocket geleegd.
  *
  * Deel 1: tekst, tekstvak, teksteditor, e-mail, URL, afbeelding en link op het
- * hoogste niveau van een bericht of een ACF-optiepagina. Subvelden (herhalers,
- * flexibele inhoud) volgen met het zijpaneel.
+ * hoogste niveau van een bericht of een ACF-optiepagina.
+ *
+ * Deel 2: lijsten (herhaler, flexibele inhoud) in een zijpaneel. Het thema
+ * markeert een lijst met hm_list_attr() en elke rij met hm_row_attr(). Een
+ * herhaler mag rijen toevoegen, dupliceren, verplaatsen en verwijderen; bij
+ * flexibele inhoud verandert alleen de inhoud van bestaande secties. Een lijst
+ * wordt als geheel opgeslagen; subvelden van een ander type blijven ongemoeid.
  *
  * @package HashtagMedia\Toolkit
  */
@@ -33,6 +38,11 @@ final class Module extends Base {
 	private const TYPES = array( 'text', 'textarea', 'email', 'url', 'wysiwyg', 'image', 'link' );
 
 	/**
+	 * Veldtypes die als lijst in het zijpaneel te bewerken zijn.
+	 */
+	private const LISTS = array( 'repeater', 'flexible_content' );
+
+	/**
 	 * Staan er op deze pagina velden die de gebruiker mag bewerken?
 	 *
 	 * @var bool
@@ -40,13 +50,23 @@ final class Module extends Base {
 	private bool $has_fields = false;
 
 	/**
+	 * Lijsten op deze pagina die de gebruiker mag bewerken: veldsleutel => array( veld, doel ).
+	 *
+	 * @var array
+	 */
+	private array $lists = array();
+
+	/**
 	 * Frontend en admin.
 	 */
 	public function boot(): void {
 		add_filter( 'hm_toolkit_field_attr', array( $this, 'field_attr' ), 10, 4 );
+		add_filter( 'hm_toolkit_list_attr', array( $this, 'list_attr' ), 10, 3 );
+		add_filter( 'hm_toolkit_row_attr', array( $this, 'row_attr' ), 10, 2 );
 		add_action( 'rest_api_init', array( $this, 'register_route' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_node' ), 90 );
 		add_action( 'wp_footer', array( $this, 'enqueue' ), 5 );
+		add_action( 'wp_head', array( $this, 'hide_button' ), 20 );
 	}
 
 	/**
@@ -59,8 +79,16 @@ final class Module extends Base {
 	 * @return array
 	 */
 	public function field_attr( $attr, $field, $post_id, $is_sub ) {
-		if ( $is_sub || is_admin() || ! is_user_logged_in() || ! is_array( $field ) || empty( $field['key'] ) || ! in_array( $field['type'] ?? '', self::TYPES, true ) ) {
+		if ( is_admin() || ! is_user_logged_in() || ! is_array( $field ) || empty( $field['key'] ) || ! in_array( $field['type'] ?? '', self::TYPES, true ) ) {
 			return $attr;
+		}
+
+		// Subveld van een lijst die te bewerken is: alleen merken, bewerken gaat in het zijpaneel.
+		if ( $is_sub ) {
+			if ( ! isset( $this->lists[ $field['parent'] ?? '' ] ) ) {
+				return $attr;
+			}
+			return array_merge( (array) $attr, array( 'data-hm-sub' => (string) $field['key'] ) );
 		}
 
 		$target = self::target( $post_id );
@@ -83,6 +111,177 @@ final class Module extends Base {
 			$attr['tabindex']      = '0';
 		}
 		return $attr;
+	}
+
+	/**
+	 * Markeert een lijst (herhaler of flexibele inhoud) als bewerkbaar voor wie dat mag.
+	 *
+	 * @param array      $attr    Attributen.
+	 * @param array      $field   ACF-veld.
+	 * @param int|string $post_id Bericht-ID, 'option' of false.
+	 * @return array
+	 */
+	public function list_attr( $attr, $field, $post_id ) {
+		if ( is_admin() || ! is_user_logged_in() || ! is_array( $field ) || empty( $field['key'] ) || ! in_array( $field['type'] ?? '', self::LISTS, true )
+			|| ! function_exists( 'acf_get_field_group' ) || ! acf_get_field_group( $field['parent'] ?? 0 ) ) {
+			return $attr;
+		}
+
+		$target = self::target( $post_id );
+		if ( ! $target || ! self::can_edit( $field, $target ) ) {
+			return $attr;
+		}
+
+		$this->has_fields             = true;
+		$this->lists[ $field['key'] ] = array( $field, $target );
+		return array_merge(
+			(array) $attr,
+			array(
+				'data-hm-list'  => (string) $field['key'],
+				'data-hm-post'  => (string) $target,
+				'data-hm-label' => (string) ( $field['label'] ?? '' ),
+				'tabindex'      => '0',
+			)
+		);
+	}
+
+	/**
+	 * Markeert een rij van een lijst die te bewerken is.
+	 *
+	 * @param array $attr  Attributen.
+	 * @param int   $index Rijnummer vanaf 1.
+	 * @return array
+	 */
+	public function row_attr( $attr, $index ) {
+		$loop = function_exists( 'acf_get_loop' ) ? acf_get_loop( 'active' ) : false;
+		if ( $index > 0 && is_array( $loop ) && isset( $this->lists[ $loop['field']['key'] ?? '' ] ) ) {
+			return array_merge( (array) $attr, array( 'data-hm-row' => (string) ( $index - 1 ) ) );
+		}
+		return $attr;
+	}
+
+	/**
+	 * Gegevens van de lijsten voor het zijpaneel: velden per soort rij en de huidige rijen.
+	 *
+	 * @return array
+	 */
+	private function lists_data(): array {
+		$out = array();
+		foreach ( $this->lists as $key => list( $field, $target ) ) {
+			$layouts = array();
+			foreach ( self::layouts( $field ) as $name => $layout ) {
+				$layouts[ $name ] = array(
+					'label'  => $layout['label'],
+					'fields' => array(),
+				);
+				foreach ( $layout['sub_fields'] as $sub ) {
+					if ( in_array( $sub['type'] ?? '', self::TYPES, true ) ) {
+						$layouts[ $name ]['fields'][] = array(
+							'key'   => (string) $sub['key'],
+							'label' => (string) ( $sub['label'] ?? '' ),
+							'type'  => (string) $sub['type'],
+						);
+					}
+				}
+			}
+
+			$rows = array();
+			foreach ( self::rows( $field, $target ) as $row ) {
+				$name   = 'flexible_content' === $field['type'] ? (string) ( $row['acf_fc_layout'] ?? '' ) : '';
+				$values = array();
+				$images = array();
+				foreach ( $layouts[ $name ]['fields'] ?? array() as $sub ) {
+					$raw = self::cell( $row, $sub );
+					if ( 'image' === $sub['type'] ) {
+						$id = hm_image_id( $raw );
+						if ( $id ) {
+							$images[ $sub['key'] ] = array(
+								'url'  => (string) wp_get_attachment_image_url( $id, 'thumbnail' ),
+								'name' => basename( (string) get_attached_file( $id ) ),
+							);
+						}
+						$raw = $id;
+					} elseif ( 'link' === $sub['type'] ) {
+						$raw = array(
+							'title'  => (string) ( is_array( $raw ) ? ( $raw['title'] ?? '' ) : '' ),
+							'url'    => (string) ( is_array( $raw ) ? ( $raw['url'] ?? '' ) : '' ),
+							'target' => ( is_array( $raw ) && '_blank' === ( $raw['target'] ?? '' ) ) ? '_blank' : '',
+						);
+					} elseif ( 'wysiwyg' === $sub['type'] ) {
+						// Zoals de pagina het toont (alinea's), zodat het paneel niets platslaat.
+						$raw = wp_kses_post( (string) apply_filters( 'acf_the_content', is_scalar( $raw ) ? (string) $raw : '' ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Filter van ACF zelf.
+					} else {
+						$raw = is_scalar( $raw ) ? (string) $raw : '';
+					}
+					$values[ $sub['key'] ] = $raw;
+				}
+				$rows[] = array(
+					'layout' => $name,
+					'values' => (object) $values,
+					'images' => (object) $images,
+				);
+			}
+
+			$out[] = array(
+				'key'     => (string) $key,
+				'post'    => (string) $target,
+				'label'   => (string) ( $field['label'] ?? '' ),
+				'flex'    => 'flexible_content' === $field['type'],
+				'min'     => (int) ( $field['min'] ?? 0 ),
+				'max'     => (int) ( $field['max'] ?? 0 ),
+				'layouts' => (object) $layouts,
+				'rows'    => $rows,
+			);
+		}
+		return $out;
+	}
+
+	/**
+	 * Soorten rij van een lijst: naam => array( label, sub_fields ). Een herhaler heeft er één, zonder naam.
+	 *
+	 * @param array $field Herhaler of flexibele inhoud.
+	 * @return array
+	 */
+	private static function layouts( array $field ): array {
+		if ( 'flexible_content' !== $field['type'] ) {
+			return array(
+				'' => array(
+					'label'      => '',
+					'sub_fields' => (array) ( $field['sub_fields'] ?? array() ),
+				),
+			);
+		}
+		$out = array();
+		foreach ( (array) ( $field['layouts'] ?? array() ) as $layout ) {
+			$out[ (string) $layout['name'] ] = array(
+				'label'      => (string) ( $layout['label'] ?? '' ),
+				'sub_fields' => (array) ( $layout['sub_fields'] ?? array() ),
+			);
+		}
+		return $out;
+	}
+
+	/**
+	 * Opgeslagen rijen van een lijst (ruwe waarden).
+	 *
+	 * @param array      $field  Herhaler of flexibele inhoud.
+	 * @param int|string $target Bericht-ID of 'option'.
+	 * @return array
+	 */
+	private static function rows( array $field, $target ): array {
+		$rows = get_field( $field['key'], $target, false );
+		return is_array( $rows ) ? array_values( array_filter( $rows, 'is_array' ) ) : array();
+	}
+
+	/**
+	 * Waarde van een subveld in een rij; ACF geeft de rij met de veldsleutel of de veldnaam.
+	 *
+	 * @param array $row Rij.
+	 * @param array $sub Subveld.
+	 * @return mixed
+	 */
+	private static function cell( array $row, array $sub ) {
+		return $row[ $sub['key'] ] ?? ( $row[ $sub['name'] ?? '' ] ?? '' );
 	}
 
 	/**
@@ -129,12 +328,15 @@ final class Module extends Base {
 	}
 
 	/**
-	 * Knop "Visueel bewerken" in de adminbalk, alleen als er iets te bewerken is.
+	 * Knop "Visueel bewerken" in de adminbalk. Een thema met wp_body_open() laat de
+	 * adminbalk tekenen voordat de velden bekend zijn; daarom staat de knop er altijd
+	 * en blijft hij verborgen tot de pagina bewerkbare velden blijkt te hebben
+	 * (page.css toont hem dan).
 	 *
 	 * @param \WP_Admin_Bar $admin_bar Adminbalk.
 	 */
 	public function admin_bar_node( \WP_Admin_Bar $admin_bar ): void {
-		if ( is_admin() || ! $this->has_fields ) {
+		if ( is_admin() ) {
 			return;
 		}
 		$admin_bar->add_node(
@@ -144,6 +346,15 @@ final class Module extends Base {
 				'href'  => '#',
 			)
 		);
+	}
+
+	/**
+	 * Verbergt de knop tot page.css hem toont (zie admin_bar_node()).
+	 */
+	public function hide_button(): void {
+		if ( is_admin_bar_showing() ) {
+			echo '<style>#wp-admin-bar-hm-toolkit-bewerken{display:none}</style>' . "\n";
+		}
 	}
 
 	/**
@@ -169,6 +380,7 @@ final class Module extends Base {
 				'ui'     => $this->url( 'assets/ui.css' ) . '?ver=' . rawurlencode( HM_TOOLKIT_VERSION ),
 				'title'  => is_singular() ? get_the_title( get_queried_object_id() ) : wp_get_document_title(),
 				'focus'  => has_filter( 'hm_toolkit_image_focus' ) ? 1 : 0,
+				'lists'  => $this->lists_data(),
 			)
 		);
 	}
@@ -227,12 +439,14 @@ final class Module extends Base {
 			$field  = acf_get_field( sanitize_text_field( (string) ( $change['key'] ?? '' ) ) );
 			$target = 'option' === ( $change['post'] ?? '' ) ? 'option' : absint( $change['post'] ?? 0 );
 
-			if ( ! is_array( $field ) || ! in_array( $field['type'], self::TYPES, true ) || ! acf_get_field_group( $field['parent'] ?? 0 )
+			$is_list = is_array( $field ) && in_array( $field['type'], self::LISTS, true );
+
+			if ( ! is_array( $field ) || ( ! $is_list && ! in_array( $field['type'], self::TYPES, true ) ) || ! acf_get_field_group( $field['parent'] ?? 0 )
 				|| ! $target || ( 'option' !== $target && ! get_post( $target ) ) || ! self::can_edit( $field, $target ) ) {
 				return new \WP_Error( 'hm_toolkit_veld', __( 'Je mag een van deze velden niet bewerken. Er is niets opgeslagen.', 'hashtagmedia-toolkit' ), array( 'status' => 403 ) );
 			}
 
-			$value = self::sanitize_value( $field['type'], $change['value'] ?? null );
+			$value = $is_list ? self::sanitize_list( $field, $target, $change['value'] ?? null ) : self::sanitize_value( $field['type'], $change['value'] ?? null );
 			if ( null === $value ) {
 				return new \WP_Error(
 					'hm_toolkit_waarde',
@@ -258,6 +472,72 @@ final class Module extends Base {
 				'cache' => self::purge_cache( array_unique( array_column( $clean, 1 ) ) ),
 			)
 		);
+	}
+
+	/**
+	 * Saneert en bouwt de rijen van een lijst. Bij flexibele inhoud blijven aantal,
+	 * volgorde en soort van de rijen zoals ze zijn. Bij een herhaler geeft "from"
+	 * aan uit welke bestaande rij een rij komt (leeg bij een nieuwe rij); daaruit
+	 * komen de waarden van subvelden die de editor niet kent.
+	 *
+	 * @param array      $field  Herhaler of flexibele inhoud.
+	 * @param int|string $target Bericht-ID of 'option'.
+	 * @param mixed      $value  Waarde uit de editor: array( 'rows' => array( array( 'from', 'values' ) ) ).
+	 * @return array|null Null als de waarde niet geldig is.
+	 */
+	private static function sanitize_list( array $field, $target, $value ): ?array {
+		if ( ! is_array( $value ) || ! is_array( $value['rows'] ?? null ) ) {
+			return null;
+		}
+
+		$rows = array_values( $value['rows'] );
+		$old  = self::rows( $field, $target );
+		$flex = 'flexible_content' === $field['type'];
+		$min  = (int) ( $field['min'] ?? 0 );
+		$max  = (int) ( $field['max'] ?? 0 );
+		if ( count( $rows ) > 200 || ( $max && count( $rows ) > $max ) || ( $min && count( $rows ) < min( $min, count( $old ) ) ) || ( $flex && count( $rows ) !== count( $old ) ) ) {
+			return null;
+		}
+
+		$layouts = self::layouts( $field );
+		$out     = array();
+		foreach ( $rows as $i => $row ) {
+			$from = is_array( $row ) && isset( $row['from'] ) && is_numeric( $row['from'] ) ? (int) $row['from'] : null;
+			if ( ! is_array( $row ) || ( null !== $from && ! isset( $old[ $from ] ) ) || ( $flex && $from !== $i ) ) {
+				return null;
+			}
+
+			$name = $flex ? (string) ( $old[ $i ]['acf_fc_layout'] ?? '' ) : '';
+			if ( ! isset( $layouts[ $name ] ) ) {
+				$out[] = $old[ $i ]; // Soort rij bestaat niet meer: niet aanraken.
+				continue;
+			}
+
+			$vals = is_array( $row['values'] ?? null ) ? $row['values'] : array();
+			$new  = $flex ? array( 'acf_fc_layout' => $name ) : array();
+			foreach ( $layouts[ $name ]['sub_fields'] as $sub ) {
+				$k = (string) $sub['key'];
+				if ( ! in_array( $sub['type'], self::TYPES, true ) ) {
+					if ( null !== $from ) {
+						$new[ $k ] = self::cell( $old[ $from ], $sub ); // Onbekend type: ongemoeid.
+					}
+					continue;
+				}
+				if ( ! isset( $vals[ $k ] ) ) {
+					$new[ $k ] = null !== $from ? self::cell( $old[ $from ], $sub ) : '';
+				} elseif ( 'image' === $sub['type'] && in_array( $vals[ $k ], array( '', 0, '0' ), true ) ) {
+					$new[ $k ] = ''; // Afbeelding leeg gelaten of gewist.
+				} else {
+					$clean = self::sanitize_value( $sub['type'], $vals[ $k ] );
+					if ( null === $clean ) {
+						return null;
+					}
+					$new[ $k ] = $clean;
+				}
+			}
+			$out[] = $new;
+		}
+		return $out;
 	}
 
 	/**

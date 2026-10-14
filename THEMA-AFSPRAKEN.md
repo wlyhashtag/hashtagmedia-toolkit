@@ -53,7 +53,25 @@ $html = hm_get_field( 'titel' );                                       // geeft 
 ```
 
 - Bezoekers krijgen gewone HTML; alleen wie mag bewerken krijgt `data-hm-*`-attributen. Gebruik voor tekst `tag` als het element alleen de tekst bevat; anders komt er een `<span>` (teksteditor: `<div>`) omheen.
-- Binnen `have_rows()` toont `hm_field()` het subveld. Subvelden zijn pas bewerkbaar met het zijpaneel (volgt).
+- Binnen `have_rows()` toont `hm_field()` het subveld. Subvelden zijn bewerkbaar in het zijpaneel, als de lijst is gemarkeerd (zie hieronder).
+
+Lijsten (herhaler en flexibele inhoud) bewerkbaar maken: markeer het element rond de lijst met `hm_list_attr()` en het element van elke rij met `hm_row_attr()`. Alleen wie mag bewerken krijgt de attributen.
+
+```php
+<div class="behandelingen" <?php hm_list_attr( 'behandelingen' ); ?>>
+	<?php while ( have_rows( 'behandelingen' ) ) : the_row(); ?>
+		<article class="kaart" <?php hm_row_attr(); ?>>
+			<?php hm_field( 'afbeelding', array( 'fit' => 'cover' ) ); ?>
+			<h3><?php hm_field( 'titel' ); ?></h3>
+		</article>
+	<?php endwhile; ?>
+</div>
+```
+
+- `hm_list_attr( $naam, array( 'post_id' => 'option' ) )` voor een lijst op de optiepagina. Zonder `hm_list_attr()` blijft de lijst gewoon werken, maar is hij niet bewerkbaar op de pagina.
+- De rijen horen vaste broers van elkaar te zijn (zelfde ouder) en `hm_row_attr()` hoort op het element van de rij zelf; dan werken verplaatsen en dupliceren ook live. Een lijst zonder rijen krijgt in de bewerkmodus een minimale hoogte van 48 px, zodat hij aan te klikken is.
+- Eén niveau: een lijst in een lijst krijgt geen paneel. Flexibele inhoud: de klant bewerkt alleen de inhoud van bestaande secties, niet de volgorde of het aantal.
+- Toon subvelden van andere types (keuzelijst, getal) met `get_sub_field()`; de editor laat ze bij het opslaan ongemoeid.
 - Andere veldtypes (keuzes, getallen, relaties): gewoon `get_field()`.
 - Optiepagina's met de standaard `post_id` (`options`) werken; een eigen `post_id` niet.
 - Het thema heeft de gebruikelijke `.screen-reader-text`-regel nodig (het mediavenster gebruikt hem).

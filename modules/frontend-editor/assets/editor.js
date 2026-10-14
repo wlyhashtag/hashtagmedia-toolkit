@@ -25,6 +25,8 @@
 	var savedRange = null;
 	var publishing = false;
 	var warned = new Set();
+	var panel = { list: null, menuButton: null }; // Het zijpaneel: welke lijst is open.
+	var drag = { row: null };
 
 	var ICON = {
 		pencil: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
@@ -35,12 +37,23 @@
 		focus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>',
 		close: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
 		globe: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
-		check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>'
+		check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>',
+		dots: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>',
+		up: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>',
+		grip: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
+		plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'
 	};
 
 	// Alleen vaste HTML; alles wat van de site komt gaat via textContent of value.
 	var TEMPLATE =
 		'<link rel="stylesheet" href="">' +
+		'<aside class="layer card panel" hidden>' +
+			'<header><div><div class="ptitle"></div><div class="psub"></div></div>' +
+			'<button type="button" class="ico" data-act="panel-close" aria-label="Paneel sluiten">' + ICON.close + '</button></header>' +
+			'<div class="plist"></div>' +
+			'<footer><button type="button" class="b padd" data-act="panel-add">' + ICON.plus + 'Onderdeel toevoegen</button></footer>' +
+			'<div class="menu" role="menu" hidden></div>' +
+		'</aside>' +
 		'<div class="layer card bar" role="toolbar" aria-label="Visueel bewerken">' + ICON.pencil +
 			'<span class="title"></span>' +
 			'<span class="status" aria-live="polite"><span class="dot"></span><span class="status-text"></span></span>' +
@@ -91,6 +104,7 @@
 		root.classList.add( 'hm-te-on' );
 		build();
 		document.querySelectorAll( '[data-hm-field]' ).forEach( setupField );
+		( cfg.lists || [] ).forEach( setupList );
 		document.addEventListener( 'click', blockNavigation, true );
 		document.addEventListener( 'keydown', onKey );
 		window.addEventListener( 'beforeunload', warnUnload );
@@ -107,9 +121,20 @@
 		shadow.querySelector( 'link' ).href = cfg.ui;
 		document.body.appendChild( host );
 
-		[ 'bar', 'tools', 'chip', 'warn', 'imgtools', 'pop', 'toast', 'linkform', 'results' ].forEach( function ( name ) {
+		[ 'bar', 'tools', 'chip', 'warn', 'imgtools', 'pop', 'toast', 'linkform', 'results', 'panel', 'plist', 'ptitle', 'psub', 'padd', 'menu' ].forEach( function ( name ) {
 			$[ name ] = shadow.querySelector( '.' + name );
 		} );
+		$.panel.addEventListener( 'click', function ( event ) {
+			var button = event.target.closest( 'button' );
+			if ( button && 'panel-close' === button.dataset.act ) {
+				closePanel();
+			} else if ( button && 'panel-add' === button.dataset.act && panel.list ) {
+				addRow( panel.list );
+			} else if ( ! event.target.closest( '.menu, [aria-haspopup]' ) ) {
+				closeMenu( true );
+			}
+		} );
+		$.plist.addEventListener( 'scroll', place, { passive: true } );
 		$.statusText = shadow.querySelector( '.status-text' );
 		$.cancel = shadow.querySelector( '[data-act="cancel"]' );
 		$.publish = shadow.querySelector( '[data-act="publish"]' );
@@ -313,15 +338,30 @@
 			return;
 		}
 		if ( 'link' === button.dataset.cmd ) {
-			var selection = document.getSelection();
+			var selection = getSel();
 			savedRange = selection.rangeCount ? selection.getRangeAt( 0 ).cloneRange() : null;
 			$.linkform.hidden = false;
+			place(); // De werkbalk is nu breder: binnen het scherm houden.
 			$.linkInput.value = '';
 			$.linkInput.focus();
 			return;
 		}
 		document.execCommand( button.dataset.cmd, false, null );
-		record( current.tools );
+		edited( current.tools );
+	}
+
+	// Een veld in het zijpaneel meldt zelf wat er gebeurt (hmEdited); een veld op de pagina wordt direct vastgelegd.
+	function edited( el ) {
+		if ( el.hmEdited ) {
+			el.hmEdited();
+		} else {
+			record( el );
+		}
+	}
+
+	// Een selectie binnen het paneel (Shadow DOM) staat in de shadowroot, niet in het document.
+	function getSel() {
+		return shadow.getSelection ? shadow.getSelection() : document.getSelection();
 	}
 
 	function onLinkSubmit( event ) {
@@ -334,7 +374,7 @@
 		}
 		el.focus();
 		if ( savedRange ) {
-			var selection = document.getSelection();
+			var selection = getSel();
 			selection.removeAllRanges();
 			selection.addRange( savedRange );
 		}
@@ -343,16 +383,23 @@
 		} else {
 			document.execCommand( 'unlink', false, null );
 		}
-		record( el );
+		edited( el );
 	}
 
 	// ---------------------------------------------------------------- Afbeeldingen
 
 	function openMedia( el, focusOnly ) {
+		chooseImage( el.dataset.hmValue, focusOnly, function ( att ) {
+			setImage( el, att );
+		} );
+	}
+
+	// Mediavenster; onSelect krijgt de gekozen afbeelding (niet bij focusOnly).
+	function chooseImage( currentId, focusOnly, onSelect ) {
 		if ( ! window.wp || ! wp.media ) {
 			return;
 		}
-		var id = parseInt( el.dataset.hmValue, 10 ) || 0;
+		var id = parseInt( currentId, 10 ) || 0;
 		var frame = wp.media( {
 			title: focusOnly ? 'Focuspunt kiezen' : 'Afbeelding kiezen',
 			button: { text: focusOnly ? 'Klaar' : 'Deze afbeelding gebruiken' },
@@ -371,8 +418,7 @@
 			if ( focusOnly ) {
 				return; // Het focuspunt komt via followFocus().
 			}
-			var att = frame.state().get( 'selection' ).first().toJSON();
-			setImage( el, att );
+			onSelect( frame.state().get( 'selection' ).first().toJSON() );
 		} );
 		frame.open();
 	}
@@ -503,6 +549,661 @@
 	function decode( html ) {
 		var doc = new DOMParser().parseFromString( String( html ), 'text/html' );
 		return doc.documentElement.textContent;
+	}
+
+	// ---------------------------------------------------------------- Lijsten (zijpaneel)
+
+	var rowId = 0;
+	var TEXTY = [ 'text', 'textarea', 'email', 'url', 'wysiwyg' ];
+
+	function h( tag, cls, text ) {
+		var node = document.createElement( tag );
+		if ( cls ) {
+			node.className = cls;
+		}
+		if ( undefined !== text ) {
+			node.textContent = text;
+		}
+		return node;
+	}
+
+	function icon( name ) {
+		var span = h( 'span', 'svg' );
+		span.innerHTML = ICON[ name ]; // Vaste HTML uit ICON.
+		return span;
+	}
+
+	function clone( value ) {
+		return JSON.parse( JSON.stringify( value ) );
+	}
+
+	// Haalt scripts en gebeurtenis-attributen uit HTML dat in het paneel of op de pagina komt.
+	function cleanHtml( html ) {
+		var doc = new DOMParser().parseFromString( '<body>' + html, 'text/html' );
+		doc.querySelectorAll( 'script, style, iframe, object, embed, link, meta, form' ).forEach( function ( node ) {
+			node.remove();
+		} );
+		doc.body.querySelectorAll( '*' ).forEach( function ( node ) {
+			Array.from( node.attributes ).forEach( function ( attr ) {
+				if ( /^on/i.test( attr.name ) || /^\s*javascript:/i.test( attr.value ) ) {
+					node.removeAttribute( attr.name );
+				}
+			} );
+		} );
+		return doc.body.innerHTML;
+	}
+
+	function plain( html ) {
+		return new DOMParser().parseFromString( String( html ), 'text/html' ).documentElement.textContent.trim();
+	}
+
+	function setupList( desc ) {
+		var el = document.querySelector( '[data-hm-list="' + desc.key + '"][data-hm-post="' + desc.post + '"]' );
+		if ( ! el ) {
+			return;
+		}
+		var byIndex = {};
+		el.querySelectorAll( '[data-hm-row]' ).forEach( function ( rowEl ) {
+			if ( rowEl.closest( '[data-hm-list]' ) === el ) {
+				byIndex[ rowEl.dataset.hmRow ] = rowEl;
+			}
+		} );
+		var list = { desc: desc, el: el, expanded: null, tail: null };
+		list.rows = desc.rows.map( function ( row, i ) {
+			return {
+				id: ++rowId,
+				from: i,
+				layout: row.layout,
+				values: clone( row.values ),
+				images: clone( row.images ),
+				touched: {},
+				el: byIndex[ i ] || null
+			};
+		} );
+		// Een merkteken achter de laatste rij, om rijen in volgorde terug te zetten.
+		var last = list.rows.filter( function ( r ) {
+			return r.el;
+		} ).pop();
+		if ( last ) {
+			list.tail = document.createComment( 'hm' );
+			last.el.after( list.tail );
+		}
+		list.original = JSON.stringify( listValue( list ) );
+
+		el.addEventListener( 'click', function ( event ) {
+			if ( event.target.closest( '[data-hm-field]' ) ) {
+				return;
+			}
+			var rowEl = event.target.closest( '[data-hm-row]' );
+			var row = rowEl && list.rows.find( function ( r ) {
+				return r.el === rowEl;
+			} );
+			openPanel( list, row || null );
+		} );
+		el.addEventListener( 'keydown', function ( event ) {
+			if ( event.target === el && ( 'Enter' === event.key || ' ' === event.key ) ) {
+				event.preventDefault();
+				openPanel( list, null );
+			}
+		} );
+		el.addEventListener( 'mouseenter', function () {
+			show( $.chip, el );
+		} );
+		el.addEventListener( 'mouseleave', function () {
+			hide( $.chip );
+		} );
+	}
+
+	// Alleen wat de gebruiker aanraakte gaat mee; de server haalt de rest uit de oude rij. Een nieuwe rij gaat helemaal mee.
+	function listValue( list ) {
+		return {
+			rows: list.rows.map( function ( r ) {
+				var values = {};
+				Object.keys( r.values ).forEach( function ( k ) {
+					if ( null === r.from || r.touched[ k ] ) {
+						values[ k ] = r.values[ k ];
+					}
+				} );
+				return { from: r.from, layout: r.layout, values: values };
+			} )
+		};
+	}
+
+	function listChanged( list ) {
+		var k = list.desc.post + '|' + list.desc.key;
+		var val = listValue( list );
+		if ( JSON.stringify( val ) === list.original ) {
+			changes.delete( k );
+			list.el.classList.remove( 'hm-te-changed' );
+		} else {
+			changes.set( k, { post: list.desc.post, key: list.desc.key, value: val } );
+			list.el.classList.add( 'hm-te-changed' );
+		}
+		render();
+	}
+
+	function layoutFields( list, row ) {
+		var layout = list.desc.layouts[ row.layout ];
+		return layout ? layout.fields : [];
+	}
+
+	function rowTexts( list, row, i ) {
+		var fields = layoutFields( list, row );
+		var texts = fields.filter( function ( f ) {
+			return TEXTY.indexOf( f.type ) > -1;
+		} ).map( function ( f ) {
+			return plain( row.values[ f.key ] );
+		} ).filter( Boolean );
+		var imageField = fields.find( function ( f ) {
+			return 'image' === f.type && row.images[ f.key ];
+		} );
+		var layoutLabel = list.desc.flex && list.desc.layouts[ row.layout ] ? list.desc.layouts[ row.layout ].label : '';
+		return {
+			title: texts[ 0 ] || layoutLabel || 'Onderdeel ' + ( i + 1 ),
+			sub: texts[ 1 ] || ( texts[ 0 ] && layoutLabel ) || ( row.from === null ? 'Nieuw, nog leeg' : 'Nog geen omschrijving' ),
+			thumb: imageField ? row.images[ imageField.key ].url : ''
+		};
+	}
+
+	function openPanel( list, row ) {
+		if ( panel.list && panel.list !== list ) {
+			closePanel();
+		}
+		panel.list = list;
+		list.el.classList.add( 'hm-te-list-on' );
+		if ( row ) {
+			list.expanded = row;
+		} else if ( ! list.expanded || list.rows.indexOf( list.expanded ) < 0 ) {
+			list.expanded = list.desc.flex || 1 === list.rows.length ? list.rows[ 0 ] || null : null;
+		}
+		$.panel.hidden = false;
+		shadow.host.classList.add( 'panel-on' );
+		hide( $.chip );
+		renderPanel();
+		if ( row ) {
+			var input = $.plist.querySelector( '.pbody input, .pbody textarea, .pbody [contenteditable]' );
+			if ( input ) {
+				input.focus( { preventScroll: true } );
+			}
+		}
+	}
+
+	function closePanel() {
+		var list = panel.list;
+		if ( ! list ) {
+			return;
+		}
+		closeMenu();
+		hide( $.tools );
+		list.el.classList.remove( 'hm-te-list-on' );
+		list.rows.forEach( function ( r ) {
+			if ( r.el ) {
+				r.el.classList.remove( 'hm-te-row-on', 'hm-te-row-hover' );
+			}
+		} );
+		panel.list = null;
+		$.panel.hidden = true;
+		shadow.host.classList.remove( 'panel-on' );
+	}
+
+	function renderPanel() {
+		var list = panel.list;
+		var desc = list.desc;
+		var n = list.rows.length;
+		var sub = n + ( 1 === n ? ' onderdeel' : ' onderdelen' );
+		if ( ! desc.flex && n > 1 ) {
+			sub += ' · sleep om te ordenen';
+		}
+		if ( 'option' === desc.post ) {
+			sub += ' · staat op elke pagina';
+		}
+		$.panel.setAttribute( 'aria-label', desc.label + ' bewerken' );
+		$.ptitle.textContent = desc.label;
+		$.psub.textContent = sub;
+		$.padd.hidden = desc.flex;
+		$.padd.disabled = desc.max > 0 && n >= desc.max;
+		$.padd.title = $.padd.disabled ? 'Maximaal ' + desc.max + ' onderdelen' : '';
+
+		$.plist.textContent = '';
+		if ( ! n ) {
+			$.plist.appendChild( h( 'p', 'pempty', 'Nog geen onderdelen.' ) );
+		}
+		list.rows.forEach( function ( row, i ) {
+			$.plist.appendChild( buildCard( list, row, i ) );
+			if ( row.el ) {
+				row.el.classList.toggle( 'hm-te-row-on', row === list.expanded );
+			}
+		} );
+	}
+
+	function buildCard( list, row, i ) {
+		var open = row === list.expanded;
+		var card = h( 'div', 'pcard' + ( open ? ' open' : '' ) );
+		var head = h( 'div', 'phead' );
+		var main = h( 'button', 'pmain' );
+		var thumb = h( 'span', 'pthumb' );
+		var text = h( 'span', 'ptext' );
+		var title = h( 'span', 'pt' );
+		var sum = h( 'span', 'ps' );
+		main.type = 'button';
+		main.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+		text.append( title, sum );
+		main.append( thumb, text );
+		head.appendChild( main );
+		card.appendChild( head );
+
+		var fill = function () {
+			var t = rowTexts( list, row, list.rows.indexOf( row ) );
+			title.textContent = t.title;
+			sum.textContent = t.sub;
+			thumb.style.backgroundImage = t.thumb ? 'url("' + encodeURI( t.thumb ) + '")' : '';
+		};
+		fill();
+
+		main.addEventListener( 'click', function () {
+			list.expanded = open ? null : row;
+			if ( list.expanded && row.el ) {
+				row.el.scrollIntoView( { block: 'center', behavior: 'smooth' } );
+			}
+			renderPanel();
+		} );
+		card.addEventListener( 'mouseenter', function () {
+			if ( row.el ) {
+				row.el.classList.add( 'hm-te-row-hover' );
+			}
+		} );
+		card.addEventListener( 'mouseleave', function () {
+			if ( row.el ) {
+				row.el.classList.remove( 'hm-te-row-hover' );
+			}
+		} );
+
+		if ( ! list.desc.flex ) {
+			var more = h( 'button', 'ico' );
+			more.type = 'button';
+			more.setAttribute( 'aria-label', 'Meer acties' );
+			more.setAttribute( 'aria-haspopup', 'menu' );
+			more.appendChild( icon( 'dots' ) );
+			more.addEventListener( 'click', function ( event ) {
+				event.stopPropagation();
+				openMenu( list, row, more );
+			} );
+			head.appendChild( more );
+		}
+		if ( open ) {
+			var chevron = h( 'button', 'ico' );
+			chevron.type = 'button';
+			chevron.setAttribute( 'aria-label', 'Inklappen' );
+			chevron.appendChild( icon( 'up' ) );
+			chevron.addEventListener( 'click', function () {
+				list.expanded = null;
+				renderPanel();
+			} );
+			head.appendChild( chevron );
+		} else if ( ! list.desc.flex ) {
+			head.appendChild( dragHandle( list, card, row ) );
+		}
+
+		if ( open ) {
+			var body = h( 'div', 'pbody' );
+			layoutFields( list, row ).forEach( function ( f ) {
+				body.appendChild( buildField( list, row, f, fill ) );
+			} );
+			if ( ! body.children.length ) {
+				body.appendChild( h( 'p', 'hint', 'In dit onderdeel staat niets dat hier te bewerken is.' ) );
+			}
+			card.appendChild( body );
+		}
+		return card;
+	}
+
+	function touch( list, row, f, fill ) {
+		row.touched[ f.key ] = true;
+		fill();
+		liveUpdate( row, f );
+		listChanged( list );
+	}
+
+	function buildField( list, row, f, fill ) {
+		var wrap = h( 'div', 'pfield' );
+		var id = 'hm-f-' + row.id + '-' + f.key;
+		var label = h( 'label', 'lbl', f.label );
+		var control;
+		label.htmlFor = id;
+		wrap.appendChild( label );
+
+		if ( 'image' === f.type ) {
+			label.removeAttribute( 'for' );
+			wrap.appendChild( buildImage( list, row, f, fill ) );
+			return wrap;
+		}
+		if ( 'link' === f.type ) {
+			label.removeAttribute( 'for' );
+			wrap.appendChild( buildLink( list, row, f, fill ) );
+			return wrap;
+		}
+		if ( 'wysiwyg' === f.type ) {
+			control = h( 'div', 'inp rich' );
+			control.contentEditable = 'true';
+			control.setAttribute( 'role', 'textbox' );
+			control.setAttribute( 'aria-multiline', 'true' );
+			control.setAttribute( 'aria-labelledby', id + '-l' );
+			label.id = id + '-l';
+			label.removeAttribute( 'for' );
+			control.innerHTML = cleanHtml( row.values[ f.key ] || '' ); // Opgeschoond hierboven.
+			control.hmEdited = function () {
+				row.values[ f.key ] = control.innerHTML;
+				touch( list, row, f, fill );
+			};
+			control.addEventListener( 'input', control.hmEdited );
+			control.addEventListener( 'paste', pastePlain );
+			control.addEventListener( 'focus', function () {
+				document.execCommand( 'defaultParagraphSeparator', false, 'p' );
+				current.tools = control;
+				$.linkform.hidden = true;
+				show( $.tools, control );
+			} );
+			control.addEventListener( 'blur', function () {
+				setTimeout( function () {
+					if ( ! ( shadow.activeElement && ( $.tools.contains( shadow.activeElement ) || shadow.activeElement === control ) ) ) {
+						hide( $.tools );
+					}
+				}, 150 );
+			} );
+		} else {
+			control = h( 'textarea' === f.type ? 'textarea' : 'input', 'inp' );
+			control.id = id;
+			if ( 'textarea' === f.type ) {
+				control.rows = 3;
+			} else {
+				control.type = 'email' === f.type ? 'email' : 'text';
+			}
+			control.value = row.values[ f.key ] || '';
+			control.addEventListener( 'input', function () {
+				row.values[ f.key ] = control.value;
+				touch( list, row, f, fill );
+			} );
+		}
+		wrap.appendChild( control );
+		return wrap;
+	}
+
+	function buildImage( list, row, f, fill ) {
+		var box = h( 'div', 'pimg' );
+		var thumb = h( 'span', 'pimgthumb' );
+		var name = h( 'span', 'pimgname' );
+		var pick = h( 'button', 'b' );
+		var clear = h( 'button', 'b' );
+		pick.type = clear.type = 'button';
+		clear.textContent = 'Wissen';
+		var paint = function () {
+			var img = row.images[ f.key ];
+			thumb.style.backgroundImage = img && img.url ? 'url("' + encodeURI( img.url ) + '")' : '';
+			name.textContent = img ? img.name : 'Geen afbeelding';
+			pick.textContent = img ? 'Vervangen' : 'Kiezen';
+			clear.hidden = ! img;
+		};
+		paint();
+		pick.addEventListener( 'click', function () {
+			chooseImage( row.values[ f.key ], false, function ( att ) {
+				var small = att.sizes && att.sizes.thumbnail;
+				var big = att.sizes && ( att.sizes.large || att.sizes.full );
+				row.values[ f.key ] = att.id;
+				row.images[ f.key ] = { url: small ? small.url : att.url, big: big ? big.url : att.url, name: att.filename, alt: att.alt || '' };
+				paint();
+				touch( list, row, f, fill );
+			} );
+		} );
+		clear.addEventListener( 'click', function () {
+			row.values[ f.key ] = 0;
+			delete row.images[ f.key ];
+			paint();
+			touch( list, row, f, fill );
+		} );
+		box.append( thumb, name, pick, clear );
+		return box;
+	}
+
+	function buildLink( list, row, f, fill ) {
+		var box = h( 'div', 'plink' );
+		var title = h( 'input', 'inp' );
+		var url = h( 'input', 'inp' );
+		var tgl = h( 'label', 'toggle' );
+		var check = h( 'input' );
+		var val = row.values[ f.key ] || { title: '', url: '', target: '' };
+		title.type = url.type = 'text';
+		title.setAttribute( 'aria-label', f.label + ': tekst' );
+		url.setAttribute( 'aria-label', f.label + ': link' );
+		url.placeholder = '/contact of https://…';
+		title.placeholder = 'Tekst';
+		check.type = 'checkbox';
+		title.value = val.title;
+		url.value = val.url;
+		check.checked = '_blank' === val.target;
+		tgl.append( h( 'span', null, 'Openen in een nieuw tabblad' ), check );
+		var update = function () {
+			row.values[ f.key ] = { title: title.value.trim(), url: url.value.trim(), target: check.checked ? '_blank' : '' };
+			touch( list, row, f, fill );
+		};
+		[ title, url ].forEach( function ( input ) {
+			input.addEventListener( 'input', update );
+		} );
+		check.addEventListener( 'change', update );
+		box.append( title, url, tgl );
+		return box;
+	}
+
+	// Tekst en afbeeldingen veranderen meteen op de pagina; een nieuwe rij heeft daar nog geen plek.
+	function liveUpdate( row, f ) {
+		var target = row.el && row.el.querySelector( '[data-hm-sub="' + f.key + '"]' );
+		var val = row.values[ f.key ];
+		if ( ! target ) {
+			return;
+		}
+		if ( 'image' === f.type ) {
+			var img = row.images[ f.key ];
+			if ( 'IMG' === target.tagName && img ) {
+				target.removeAttribute( 'srcset' );
+				target.removeAttribute( 'sizes' );
+				target.src = img.big || img.url;
+				target.alt = img.alt || '';
+			}
+		} else if ( 'link' === f.type ) {
+			target.textContent = val.title;
+			target.setAttribute( 'href', val.url || '#' );
+			if ( val.target ) {
+				target.setAttribute( 'target', '_blank' );
+			} else {
+				target.removeAttribute( 'target' );
+			}
+		} else if ( 'wysiwyg' === f.type ) {
+			target.innerHTML = cleanHtml( val ); // Opgeschoond hierboven.
+		} else {
+			target.textContent = val;
+		}
+	}
+
+	// ---------------------------------------------------------------- Rijen: volgorde, dupliceren, verwijderen
+
+	function syncDom( list ) {
+		var parent = list.tail && list.tail.parentNode;
+		if ( ! parent ) {
+			return;
+		}
+		list.rows.forEach( function ( r ) {
+			if ( r.el && r.el.parentNode === parent ) {
+				parent.insertBefore( r.el, list.tail );
+			}
+		} );
+	}
+
+	function afterStructure( list ) {
+		syncDom( list );
+		listChanged( list );
+		renderPanel();
+	}
+
+	function moveRow( list, from, to ) {
+		if ( to < 0 || to >= list.rows.length || from === to ) {
+			return;
+		}
+		list.rows.splice( to, 0, list.rows.splice( from, 1 )[ 0 ] );
+		afterStructure( list );
+	}
+
+	function duplicateRow( list, i ) {
+		var src = list.rows[ i ];
+		if ( list.desc.max > 0 && list.rows.length >= list.desc.max ) {
+			return;
+		}
+		var copy = {
+			id: ++rowId,
+			from: src.from,
+			layout: src.layout,
+			values: clone( src.values ),
+			images: clone( src.images ),
+			touched: clone( src.touched ),
+			el: null
+		};
+		if ( src.el ) {
+			copy.el = src.el.cloneNode( true );
+			copy.el.classList.remove( 'hm-te-row-on', 'hm-te-row-hover' );
+			src.el.after( copy.el );
+		}
+		list.rows.splice( i + 1, 0, copy );
+		list.expanded = copy;
+		afterStructure( list );
+	}
+
+	function removeRow( list, i ) {
+		if ( list.desc.min > 0 && list.rows.length <= list.desc.min ) {
+			return;
+		}
+		if ( ! window.confirm( 'Dit onderdeel verwijderen? Het verdwijnt pas echt na Publiceren.' ) ) {
+			return;
+		}
+		var row = list.rows.splice( i, 1 )[ 0 ];
+		if ( row.el ) {
+			row.el.remove();
+		}
+		if ( list.expanded === row ) {
+			list.expanded = null;
+		}
+		afterStructure( list );
+	}
+
+	function addRow( list ) {
+		if ( list.desc.flex || ( list.desc.max > 0 && list.rows.length >= list.desc.max ) ) {
+			return;
+		}
+		var row = { id: ++rowId, from: null, layout: '', values: {}, images: {}, touched: {}, el: null };
+		layoutFields( list, row ).forEach( function ( f ) {
+			row.values[ f.key ] = 'link' === f.type ? { title: '', url: '', target: '' } : ( 'image' === f.type ? 0 : '' );
+		} );
+		list.rows.push( row );
+		list.expanded = row;
+		afterStructure( list );
+		toast( 'Het nieuwe onderdeel verschijnt op de pagina na Publiceren.', false );
+	}
+
+	function dragHandle( list, card, row ) {
+		var grip = h( 'button', 'ico grip' );
+		grip.type = 'button';
+		grip.setAttribute( 'aria-label', 'Verslepen' );
+		grip.appendChild( icon( 'grip' ) );
+		grip.addEventListener( 'pointerdown', function () {
+			card.draggable = true;
+		} );
+		card.addEventListener( 'dragstart', function ( event ) {
+			drag.row = row;
+			event.dataTransfer.effectAllowed = 'move';
+			event.dataTransfer.setData( 'text/plain', String( row.id ) );
+			card.classList.add( 'dragging' );
+		} );
+		card.addEventListener( 'dragend', function () {
+			card.draggable = false;
+			drag.row = null;
+			$.plist.querySelectorAll( '.dragging, .drop-before, .drop-after' ).forEach( function ( node ) {
+				node.classList.remove( 'dragging', 'drop-before', 'drop-after' );
+			} );
+		} );
+		card.addEventListener( 'dragover', function ( event ) {
+			if ( ! drag.row || drag.row === row ) {
+				return;
+			}
+			event.preventDefault();
+			var rect = card.getBoundingClientRect();
+			var after = event.clientY > rect.top + rect.height / 2;
+			card.classList.toggle( 'drop-after', after );
+			card.classList.toggle( 'drop-before', ! after );
+		} );
+		card.addEventListener( 'dragleave', function () {
+			card.classList.remove( 'drop-before', 'drop-after' );
+		} );
+		card.addEventListener( 'drop', function ( event ) {
+			if ( ! drag.row || drag.row === row ) {
+				return;
+			}
+			event.preventDefault();
+			var rect = card.getBoundingClientRect();
+			var from = list.rows.indexOf( drag.row );
+			var to = list.rows.indexOf( row ) + ( event.clientY > rect.top + rect.height / 2 ? 1 : 0 );
+			moveRow( list, from, to > from ? to - 1 : to );
+		} );
+		return grip;
+	}
+
+	function openMenu( list, row, button ) {
+		var i = list.rows.indexOf( row );
+		var items = [
+			[ 'Dupliceren', ! ( list.desc.max > 0 && list.rows.length >= list.desc.max ), function () {
+				duplicateRow( list, i );
+			} ],
+			[ 'Omhoog', i > 0, function () {
+				moveRow( list, i, i - 1 );
+			} ],
+			[ 'Omlaag', i < list.rows.length - 1, function () {
+				moveRow( list, i, i + 1 );
+			} ],
+			[ 'Verwijderen', ! ( list.desc.min > 0 && list.rows.length <= list.desc.min ), function () {
+				removeRow( list, i );
+			}, true ]
+		];
+		closeMenu();
+		$.menu.textContent = '';
+		$.menu.setAttribute( 'aria-label', 'Acties voor onderdeel ' + ( i + 1 ) );
+		items.forEach( function ( item ) {
+			var b = h( 'button', 'b' + ( item[ 3 ] ? ' danger' : '' ), item[ 0 ] );
+			b.type = 'button';
+			b.setAttribute( 'role', 'menuitem' );
+			b.disabled = ! item[ 1 ];
+			b.addEventListener( 'click', function () {
+				closeMenu( true );
+				item[ 2 ]();
+			} );
+			$.menu.appendChild( b );
+		} );
+		var p = $.panel.getBoundingClientRect();
+		var r = button.getBoundingClientRect();
+		$.menu.hidden = false;
+		$.menu.style.top = Math.round( Math.min( r.bottom - p.top + 4, p.height - $.menu.offsetHeight - 8 ) ) + 'px';
+		$.menu.style.right = Math.round( p.right - r.right ) + 'px';
+		panel.menuButton = button;
+		var first = $.menu.querySelector( 'button:not(:disabled)' );
+		if ( first ) {
+			first.focus();
+		}
+	}
+
+	function closeMenu( skipFocus ) {
+		if ( $.menu.hidden ) {
+			return;
+		}
+		$.menu.hidden = true;
+		if ( ! skipFocus && panel.menuButton && panel.menuButton.isConnected ) {
+			panel.menuButton.focus();
+		}
+		panel.menuButton = null;
 	}
 
 	// ---------------------------------------------------------------- Balk
@@ -651,13 +1352,17 @@
 	// ---------------------------------------------------------------- Overig
 
 	function onKey( event ) {
-		if ( 'Escape' !== event.key ) {
+		if ( 'Escape' !== event.key || document.body.classList.contains( 'modal-open' ) ) {
 			return;
 		}
 		if ( ! $.pop.hidden ) {
 			closePop();
 		} else if ( ! $.linkform.hidden ) {
 			$.linkform.hidden = true;
+		} else if ( ! $.menu.hidden ) {
+			closeMenu();
+		} else if ( panel.list ) {
+			closePanel();
 		}
 	}
 

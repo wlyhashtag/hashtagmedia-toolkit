@@ -275,3 +275,47 @@ if ( ! function_exists( 'hm_field' ) ) {
 		echo hm_get_field( $name, $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Opgebouwd met esc_html(), esc_url(), wp_kses_post() en hm_toolkit_attr_string().
 	}
 }
+
+if ( ! function_exists( 'hm_list_attr' ) ) {
+	/**
+	 * Attributen voor het element rond een herhaler of flexibele inhoud, zodat
+	 * de frontend-editor er een zijpaneel voor kan openen. Wie niet mag
+	 * bewerken krijgt niets. Gebruik: <div <?php hm_list_attr( 'behandelingen' ); ?>>
+	 *
+	 * @param string $name Veldnaam van de herhaler of flexibele inhoud.
+	 * @param array  $args Argumenten: post_id (bericht-ID of 'option').
+	 */
+	function hm_list_attr( string $name, array $args = array() ): void {
+		$post_id = $args['post_id'] ?? false;
+		$field   = function_exists( 'get_field_object' ) ? get_field_object( $name, $post_id, false ) : false;
+		if ( ! $field && function_exists( 'acf_get_field' ) ) {
+			$field = acf_get_field( $name ); // Nog nooit opgeslagen.
+		}
+		if ( is_array( $field ) ) {
+			/**
+			 * Extra attributen op een lijst, bijv. voor de frontend-editor.
+			 *
+			 * @param array      $attr    Attributen.
+			 * @param array      $field   ACF-veld (herhaler of flexibele inhoud).
+			 * @param int|string $post_id Bericht-ID, 'option' of false (huidige).
+			 */
+			echo hm_toolkit_attr_string( (array) apply_filters( 'hm_toolkit_list_attr', array(), $field, $post_id ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hm_toolkit_attr_string() escapet.
+		}
+	}
+}
+
+if ( ! function_exists( 'hm_row_attr' ) ) {
+	/**
+	 * Attributen voor het element van één rij, binnen have_rows() / the_row().
+	 * Gebruik: <div <?php hm_row_attr(); ?>>
+	 */
+	function hm_row_attr(): void {
+		/**
+		 * Extra attributen op een rij, bijv. voor de frontend-editor.
+		 *
+		 * @param array $attr  Attributen.
+		 * @param int   $index Rijnummer, vanaf 1 (0 buiten een lus).
+		 */
+		echo hm_toolkit_attr_string( (array) apply_filters( 'hm_toolkit_row_attr', array(), function_exists( 'get_row_index' ) ? (int) get_row_index() : 0 ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hm_toolkit_attr_string() escapet.
+	}
+}

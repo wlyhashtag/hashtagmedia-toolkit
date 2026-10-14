@@ -86,6 +86,8 @@ De kern laadt bij elk verzoek alleen de modules die aanstaan. De modulemap wordt
 | `hm_toolkit_shortcuts` | filter | Groepen snelkoppelingen, in de vorm van `modules/snelkoppelingen/links.php`. |
 | `hm_toolkit_form_button_class` | filter | Knopklasse van de verzendknop (standaard `knop`). |
 | `hm_toolkit_field_attr` | filter | Attributen op een veld van `hm_field()` (module Frontend-editor vult dit). |
+| `hm_toolkit_list_attr` | filter | Attributen op het element rond een lijst (herhaler, flexibele inhoud); `hm_list_attr()` roept dit aan, module Frontend-editor vult het. |
+| `hm_toolkit_row_attr` | filter | Attributen op één rij van een lijst; `hm_row_attr()` roept dit aan. |
 | `hm_toolkit_save_focus` | filter | Focuspunt opslaan vanuit de frontend-editor (module Afbeeldingen doet dit). |
 
 ## Omgevingslabel
@@ -212,7 +214,15 @@ Teksten, afbeeldingen en knoppen op de pagina zelf bewerken. Werkt alleen met ve
 - **Publiceren**: alle wijzigingen in één verzoek naar `POST /wp-json/hm-toolkit/v1/velden`. Per veld opnieuw gecontroleerd: bestaat het, staat het op het hoogste niveau van een veldgroep, mag de gebruiker het bericht bewerken (`edit_post`) of de optiepagina openen (het recht van die optiepagina), en is de waarde geldig. Eén fout = niets opgeslagen. Saneren per type (`sanitize_text_field`, `wp_kses_post`, `esc_url_raw`, alleen bestaande afbeeldingen). Daarna de cache van WP Rocket legen: de pagina, of de hele site bij een optieveld.
 - **Annuleren** gooit alles weg (pagina herladen). Weggaan met openstaande wijzigingen vraagt eerst om bevestiging.
 - **Focuspunt**: in de bewerkmodus slaat de kiezer niet meteen op; de foto schuift mee en het punt telt als wijziging voor Publiceren (Annuleren draait het terug). Opslaan doet de module Afbeeldingen via het filter `hm_toolkit_save_focus`; die leegt bij een ander punt de hele cache van WP Rocket. In de mediabibliotheek in de admin slaat de kiezer wel meteen op.
-- **Nog niet** (volgende delen): lijsten (herhalers, flexibele inhoud) in het zijpaneel, het logboek met terugzetten.
+- **Lijsten in het zijpaneel** (herhaler en flexibele inhoud): een klik op de lijst (of op een rij) opent rechts een paneel van 400 px; de site blijft op volle breedte en schuift niet. Een rij is een kaart met titel, korte omschrijving en miniatuur; klik opent de velden (één rij tegelijk). De pagina scrolt de open rij in beeld en zet er een blauwe rand omheen.
+  - **Herhaler**: onderdeel toevoegen, dupliceren, omhoog/omlaag, verslepen en verwijderen (met bevestiging). Het maximum en minimum van ACF worden gerespecteerd.
+  - **Flexibele inhoud**: alleen de inhoud van bestaande secties; geen secties toevoegen, verplaatsen of verwijderen (besluit PLAN.md).
+  - **Velden in een rij**: dezelfde zeven types als op de pagina (tekst, tekstvak, teksteditor, e-mail, URL, afbeelding met Vervangen en Wissen, link). Eén niveau: een lijst in een lijst, en andere veldtypes (keuzelijst, schakelaar, getal), blijven in de admin en worden bij het opslaan **ongemoeid gelaten**.
+  - **Live of na Publiceren**: tekst, afbeelding en knop in een bestaande rij veranderen meteen op de pagina; dupliceren, verplaatsen en verwijderen ook. Een nieuwe rij verschijnt pas na Publiceren (het thema maakt de opmaak op de server).
+  - **Opslaan**: de hele lijst is één wijziging in dezelfde REST-route. De editor stuurt per rij `from` (uit welke opgeslagen rij hij komt, leeg bij een nieuwe) en alleen de velden die de gebruiker aanraakte; de server haalt de rest uit de oude rij, zodat onbekende subvelden en onaangeraakte teksten niet verloren gaan. Flexibele inhoud: aantal, volgorde en soort van de rijen moeten gelijk blijven, anders wordt alles geweigerd. Nieuwe rijen: maximaal volgens ACF, nooit meer dan 200.
+  - **Thema**: `hm_list_attr( 'veldnaam' )` op het element rond de lijst en `hm_row_attr()` op het element van elke rij (zie `THEMA-AFSPRAKEN.md`).
+- **Nog niet** (volgend deel): het logboek met terugzetten.
+- **Knop in de adminbalk**: staat er altijd (voor wie is ingelogd) en blijft verborgen tot de pagina bewerkbare velden blijkt te hebben. Nodig omdat een thema met `wp_body_open()` (vrijwel elk modern thema) de adminbalk tekent voordat de velden bekend zijn.
 - De balk en vensters staan in een Shadow DOM (`assets/ui.css`), zodat het thema ze niet kan verstoren. Op de pagina zelf alleen randen om de velden (`assets/page.css`).
 - **Kleuren**: uit de design tokens van WordPress 7 (`--wpds-*`, stylesheet `wp-theme`). Verandert WordPress zijn kleuren, dan volgt de editor vanzelf; op oudere WordPress-versies gelden de terugvalwaarden in de CSS.
 

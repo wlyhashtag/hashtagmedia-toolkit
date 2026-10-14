@@ -12,6 +12,11 @@
 	}
 }
 
+/* De knop staat altijd in de adminbalk maar is verborgen (class-module.php); deze stylesheet laadt alleen op een pagina met bewerkbare velden. */
+#wpadminbar #wp-admin-bar-hm-toolkit-bewerken {
+	display: block;
+}
+
 /* Blauw, zodat hij opvalt en niet lijkt op "Pagina bewerken" van WordPress. */
 #wpadminbar #wp-admin-bar-hm-toolkit-bewerken > .ab-item {
 	background: var(--wpds-color-background-interactive-brand-strong, #3858e9);
@@ -68,6 +73,38 @@ html.hm-te-on [data-hm-field].hm-te-changed {
 
 html.hm-te-on [data-hm-field]:focus {
 	outline-style: solid;
+}
+
+/* Lijsten (herhaler, flexibele inhoud): klik opent het zijpaneel. */
+html.hm-te-on [data-hm-list] {
+	min-height: 48px; /* Een lege lijst blijft aan te klikken. */
+	outline: 1px dashed rgba(100, 105, 112, 0.7);
+	outline-offset: 6px;
+	cursor: pointer;
+}
+
+html.hm-te-on [data-hm-list]:hover,
+html.hm-te-on [data-hm-list]:focus {
+	outline: 2px solid var(--wpds-color-stroke-focus, #3858e9);
+}
+
+html.hm-te-on [data-hm-list].hm-te-list-on {
+	outline: 2px solid var(--wpds-color-stroke-focus, #3858e9);
+	box-shadow: 0 0 0 12px rgba(56, 88, 233, 0.12);
+}
+
+html.hm-te-on [data-hm-list].hm-te-changed {
+	outline: 2px dashed var(--wpds-color-stroke-surface-warning-strong, #926300);
+}
+
+html.hm-te-on [data-hm-row].hm-te-row-hover {
+	outline: 2px solid rgba(56, 88, 233, 0.45);
+	outline-offset: 4px;
+}
+
+html.hm-te-on [data-hm-row].hm-te-row-on {
+	outline: 2px solid var(--wpds-color-stroke-focus, #3858e9);
+	outline-offset: 4px;
 }
 
 /* Leeg tekstveld: de naam van het veld als hint, zodat er iets aan te klikken is. */
