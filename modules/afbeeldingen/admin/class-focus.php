@@ -110,12 +110,19 @@ final class Focus {
 
 		$value = sanitize_text_field( (string) $attachment['hm_focus'] );
 		if ( preg_match( '/^(\d{1,3}(?:\.\d+)?),(\d{1,3}(?:\.\d+)?)$/', $value, $m ) ) {
-			$x = max( 0.0, min( 100.0, (float) $m[1] ) );
-			$y = max( 0.0, min( 100.0, (float) $m[2] ) );
+			$x   = max( 0.0, min( 100.0, (float) $m[1] ) );
+			$y   = max( 0.0, min( 100.0, (float) $m[2] ) );
+			$old = (string) get_post_meta( $id, Module::FOCUS_META, true );
 			if ( 50.0 === $x && 50.0 === $y ) {
 				delete_post_meta( $id, Module::FOCUS_META );
+				$new = '';
 			} else {
-				update_post_meta( $id, Module::FOCUS_META, Module::number( $x ) . ',' . Module::number( $y ) );
+				$new = Module::number( $x ) . ',' . Module::number( $y );
+				update_post_meta( $id, Module::FOCUS_META, $new );
+			}
+			// De afbeelding kan overal op de site staan: bij een ander focuspunt de hele cache van WP Rocket legen.
+			if ( $old !== $new && function_exists( 'rocket_clean_domain' ) ) {
+				rocket_clean_domain();
 			}
 		}
 

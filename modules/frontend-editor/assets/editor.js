@@ -368,7 +368,16 @@
 		} );
 		frame.on( 'select', function () {
 			if ( focusOnly ) {
-				return; // Het focuspunt slaat het mediavenster zelf op.
+				// Het mediavenster slaat het focuspunt zelf op; hier alleen de pagina bijwerken.
+				var parts = String( frame.$el.find( '.hm-focus__input' ).val() || '' ).split( ',' );
+				if ( 2 === parts.length ) {
+					document.querySelectorAll( 'img[data-hm-value="' + id + '"]' ).forEach( function ( img ) {
+						if ( img.style.objectFit ) {
+							img.style.objectPosition = parseFloat( parts[ 0 ] ) + '% ' + parseFloat( parts[ 1 ] ) + '%';
+						}
+					} );
+				}
+				return;
 			}
 			var att = frame.state().get( 'selection' ).first().toJSON();
 			setImage( el, att );
